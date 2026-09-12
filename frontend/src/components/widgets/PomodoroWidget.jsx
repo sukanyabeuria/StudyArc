@@ -7,7 +7,7 @@ import { Play, Pause, RotateCcw, Flame, Settings, Trophy } from 'lucide-react';
 export default function PomodoroWidget({ onSessionComplete }) {
   const { user, refreshUser } = useAuth();
 
-  const [mode, setMode] = useState('pomodoro'); // 'pomodoro' | 'short_break' | 'long_break'
+  const [mode, setMode] = useState('pomodoro');
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [sessionsCompletedToday, setSessionsCompletedToday] = useState(3);
@@ -22,7 +22,6 @@ export default function PomodoroWidget({ onSessionComplete }) {
 
   const totalDuration = MODE_DURATIONS[mode];
 
-  // Handle countdown
   useEffect(() => {
     if (isRunning) {
       timerRef.current = setInterval(() => {
@@ -51,14 +50,13 @@ export default function PomodoroWidget({ onSessionComplete }) {
   const handleComplete = async () => {
     setIsRunning(false);
 
-    // Audio chime synthesize
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
       osc.connect(gain);
@@ -66,18 +64,16 @@ export default function PomodoroWidget({ onSessionComplete }) {
       osc.start();
       osc.stop(audioCtx.currentTime + 0.8);
     } catch (e) {
-      console.warn('Audio Context not allowed without interaction');
+      console.warn('Audio Context not initialized:', e);
     }
 
-    // Confetti celebration
     confetti({
-      particleCount: 60,
-      spread: 70,
+      particleCount: 50,
+      spread: 60,
       origin: { y: 0.6 },
       colors: ['#f97316', '#fb923c', '#f59e0b']
     });
 
-    // Log session to backend
     if (mode === 'pomodoro') {
       try {
         const res = await logSession({
@@ -94,7 +90,6 @@ export default function PomodoroWidget({ onSessionComplete }) {
       }
     }
 
-    // Reset timer
     setTimeLeft(MODE_DURATIONS[mode]);
   };
 
@@ -108,76 +103,60 @@ export default function PomodoroWidget({ onSessionComplete }) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const timeFormatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-  // Calculate SVG circle stroke dash
   const strokeProgress = (timeLeft / totalDuration) * 283;
 
   return (
-    <div className="bg-focus-900/90 border border-zinc-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between h-full backdrop-blur-md">
+    <div className="bg-[#0b0c0f] border border-zinc-850 rounded-2xl p-3.5 shadow-xl flex flex-col justify-between h-full overflow-hidden text-zinc-100">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-orange-400" />
-          <h3 className="text-base font-bold text-white">Pomodoro</h3>
+          <div className="w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
+            <Trophy className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-white leading-none">Pomodoro</h3>
+            <span className="text-[10px] text-zinc-500 font-medium">Focus Interval</span>
+          </div>
         </div>
 
         <button 
           onClick={resetTimer}
-          className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60 transition-colors"
+          className="p-1 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-850 transition-colors"
           title="Reset timer"
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {/* Mode Switcher Tabs */}
-      <div className="flex items-center gap-1 p-1 bg-focus-850 rounded-xl mb-4 border border-zinc-800/60 text-xs">
-        <button
-          onClick={() => switchMode('pomodoro')}
-          className={`flex-1 py-1 rounded-lg font-medium transition-all ${
-            mode === 'pomodoro'
-              ? 'bg-orange-500 text-white font-bold shadow-sm'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          Pomodoro
-        </button>
-        <button
-          onClick={() => switchMode('short_break')}
-          className={`flex-1 py-1 rounded-lg font-medium transition-all ${
-            mode === 'short_break'
-              ? 'bg-orange-500 text-white font-bold shadow-sm'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          Short Break
-        </button>
-        <button
-          onClick={() => switchMode('long_break')}
-          className={`flex-1 py-1 rounded-lg font-medium transition-all ${
-            mode === 'long_break'
-              ? 'bg-orange-500 text-white font-bold shadow-sm'
-              : 'text-zinc-400 hover:text-zinc-200'
-          }`}
-        >
-          Long Break
-        </button>
+      <div className="flex items-center gap-1 p-1 bg-zinc-950 rounded-xl mb-2 border border-zinc-850 text-[11px]">
+        {['pomodoro', 'short_break', 'long_break'].map((m) => (
+          <button
+            key={m}
+            onClick={() => switchMode(m)}
+            className={`flex-1 py-1 rounded-lg font-medium capitalize transition-all ${
+              mode === m
+                ? 'bg-orange-500 text-white font-bold shadow-sm shadow-orange-500/20'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            {m.replace('_', ' ')}
+          </button>
+        ))}
       </div>
 
-      {/* Circular Progress Timer (Matching Mockup) */}
-      <div className="relative flex flex-col items-center justify-center my-2 select-none">
-        <div className="relative w-44 h-44 flex items-center justify-center">
+      {/* Circular Progress Timer (Compact to fit one screen) */}
+      <div className="relative flex flex-col items-center justify-center my-auto select-none py-1">
+        <div className="relative w-36 h-36 flex items-center justify-center">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            {/* Background Ring */}
             <circle
               cx="50"
               cy="50"
               r="45"
               fill="none"
-              stroke="#1b202a"
+              stroke="#1a1c23"
               strokeWidth="5"
             />
-            {/* Animated Glowing Orange Progress Ring */}
             <circle
               cx="50"
               cy="50"
@@ -188,16 +167,16 @@ export default function PomodoroWidget({ onSessionComplete }) {
               strokeDasharray="283"
               strokeDashoffset={283 - strokeProgress}
               strokeLinecap="round"
-              className="transition-all duration-1000 ease-linear drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]"
+              className="transition-all duration-1000 ease-linear drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]"
             />
           </svg>
 
-          {/* Time Text Inside Ring */}
+          {/* Time text inside ring */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="text-3xl font-black tracking-tight text-white font-mono drop-shadow">
+            <span className="text-2xl font-black tracking-tight text-white font-mono">
               {timeFormatted}
             </span>
-            <span className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider mt-1">
+            <span className="text-[9px] font-semibold text-orange-400 uppercase tracking-wider mt-0.5">
               {isRunning ? 'Focusing' : 'Paused'}
             </span>
           </div>
@@ -205,10 +184,10 @@ export default function PomodoroWidget({ onSessionComplete }) {
       </div>
 
       {/* Timer Controls */}
-      <div className="flex items-center justify-center gap-3 my-2">
+      <div className="flex items-center justify-center gap-2.5 my-1.5">
         <button
           onClick={toggleTimer}
-          className="flex-1 max-w-[150px] py-2.5 px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-2"
+          className="flex-1 max-w-[130px] py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5"
         >
           {isRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
           <span>{isRunning ? 'Pause' : 'Start'}</span>
@@ -216,16 +195,16 @@ export default function PomodoroWidget({ onSessionComplete }) {
 
         <button
           onClick={resetTimer}
-          className="p-2.5 rounded-xl bg-focus-850 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+          className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
           title="Reset"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* Footer Stats (Matching Mockup) */}
-      <div className="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-xs text-zinc-400">
-        <div className="flex items-center gap-1.5">
+      {/* Footer Stats */}
+      <div className="flex items-center justify-between pt-2 border-t border-zinc-850 text-[11px] text-zinc-400">
+        <div className="flex items-center gap-1">
           <span>Sessions Today:</span>
           <span className="font-bold text-zinc-200">{sessionsCompletedToday}</span>
         </div>

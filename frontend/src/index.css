@@ -3,41 +3,67 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-focus-950 text-zinc-100 font-sans antialiased overflow-x-hidden;
-    background-color: #0b0d12;
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    color: #f4f4f5;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    height: 100%;
+    overflow: hidden;
   }
 }
 
-/* Custom Cozy Dark Scrollbar */
+/* Styled Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f1218;
+  background: #0d0f12;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2b3343;
-  border-radius: 9999px;
+  background: #27272a;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #f97316;
 }
 
-/* Pulse Glow Animation */
-@keyframes warmPulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 35px rgba(249, 115, 22, 0.45);
-  }
+/* Explicit custom scrollbar class for widget lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
 }
 
-.animate-warm-pulse {
-  animation: warmPulse 4s infinite ease-in-out;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #111317;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
+
+/* Warm glow utilities */
+.glow-orange {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
+}
+
+.glow-orange-lg {
+  box-shadow: 0 0 35px rgba(249, 115, 22, 0.35);
 }

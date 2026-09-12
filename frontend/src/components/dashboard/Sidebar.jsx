@@ -1,7 +1,7 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
-  BookOpen,
   Home,
   LayoutGrid,
   Trophy,
@@ -9,84 +9,83 @@ import {
   Settings,
   LogOut,
   User,
-  Flame,
-  Sparkles
+  BookOpen
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar() {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { id: 'room', label: 'Home', icon: Home },
-    { id: 'workspace', label: 'Workspace', icon: LayoutGrid },
-    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
-    { id: 'about', label: 'About', icon: Info },
+    { to: '/room', label: 'Home', icon: Home },
+    { to: '/workspace', label: 'Workspace', icon: LayoutGrid },
+    { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { to: '/about', label: 'About', icon: Info },
   ];
 
-  // Calculate XP progress bar percentage
   const currentXp = user?.xp || 0;
   const currentLevel = user?.level || 1;
-  // Calculate relative progress in level (approx 150-250 XP per level)
   const xpInCurrentLevel = currentXp % 250;
   const xpPercent = Math.min(Math.round((xpInCurrentLevel / 250) * 100), 100);
 
   return (
-    <aside className="w-64 shrink-0 h-full flex flex-col justify-between p-5 bg-focus-900 border-r border-zinc-800/80 select-none z-20">
-      {/* Top: Brand Logo */}
+    <aside className="w-56 shrink-0 h-full flex flex-col justify-between p-3.5 bg-[#090a0d] border-r border-zinc-800/80 select-none z-20 overflow-hidden">
+      {/* Top Section */}
       <div>
-        <div 
-          onClick={() => setActiveTab('room')}
-          className="flex items-center gap-2.5 mb-8 px-2 cursor-pointer group"
+        <NavLink
+          to="/room"
+          className="flex items-center gap-2 mb-6 px-1.5 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/30 group-hover:shadow-orange-500/50 transition-all">
-            <BookOpen className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-md shadow-orange-600/30 group-hover:shadow-orange-500/50 transition-all">
+            <BookOpen className="w-4 h-4 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white flex items-center gap-1">
+          <span className="text-base font-bold tracking-tight text-white flex items-center gap-1">
             Focus<span className="text-orange-500">Nest</span>
           </span>
-        </div>
+        </NavLink>
 
-        {/* Navigation Links */}
-        <nav className="space-y-1.5">
+        {/* Navigation Items with NavLink */}
+        <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
-                    ? 'bg-gradient-to-r from-orange-500/20 to-orange-500/5 border border-orange-500/30 text-orange-400 shadow-sm shadow-orange-500/10'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
-                }`}
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'bg-orange-500/15 border border-orange-500/30 text-orange-400 font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 border border-transparent'
+                  }`
+                }
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'text-zinc-400'}`} />
-                <span>{item.label}</span>
-              </button>
+                {({ isActive }) => (
+                  <>
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'text-zinc-400'}`} />
+                    <span>{item.label}</span>
+                  </>
+                )}
+              </NavLink>
             );
           })}
         </nav>
       </div>
 
-      {/* Bottom: Profile & Level Card (Matching Mockup) */}
-      <div className="pt-4 border-t border-zinc-800/80 space-y-4">
-        {/* User Card */}
-        <div className="p-3.5 rounded-2xl bg-focus-850 border border-zinc-800/80 shadow-md">
-          <div className="flex items-center gap-3 mb-2.5">
+      {/* Bottom Profile Card */}
+      <div className="pt-3 border-t border-zinc-850 space-y-3">
+        <div className="p-3 rounded-xl bg-zinc-900/90 border border-zinc-800/80 shadow-md">
+          <div className="flex items-center gap-2.5 mb-2">
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center font-bold text-sm text-white shadow-md shadow-orange-600/20">
-                {user?.name?.[0]?.toUpperCase() || <User className="w-5 h-5" />}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center font-bold text-xs text-white shadow-md shadow-orange-600/20">
+                {user?.name?.[0]?.toUpperCase() || <User className="w-4 h-4" />}
               </div>
-              <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-focus-850">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block" />
-              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-zinc-900" />
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold text-zinc-100 truncate">{user?.name || 'Debasis'}</h4>
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-orange-400 font-semibold">Level {currentLevel}</span>
+              <h4 className="text-xs font-bold text-zinc-100 truncate">{user?.name || 'Debasis'}</h4>
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <span className="text-orange-400 font-semibold">Lv. {currentLevel}</span>
                 <span className="text-zinc-500">·</span>
                 <span className="text-zinc-400">{currentXp} XP</span>
               </div>
@@ -95,11 +94,11 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
           {/* XP Progress Bar */}
           <div className="space-y-1">
-            <div className="flex items-center justify-between text-[10px] text-zinc-400">
-              <span>Progress</span>
+            <div className="flex items-center justify-between text-[9px] text-zinc-400 font-medium">
+              <span>Next Level</span>
               <span>{xpPercent}%</span>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+            <div className="w-full h-1 rounded-full bg-zinc-800 overflow-hidden">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-500"
                 style={{ width: `${xpPercent}%` }}
@@ -109,18 +108,18 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center justify-between px-2 text-xs text-zinc-400">
-          <button
-            onClick={() => setActiveTab('workspace')}
-            className="flex items-center gap-1.5 hover:text-zinc-100 transition-colors"
+        <div className="flex items-center justify-between px-1.5 text-[11px] text-zinc-400">
+          <NavLink
+            to="/workspace"
+            className="flex items-center gap-1 hover:text-zinc-100 transition-colors"
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>Settings</span>
-          </button>
+            <span>Workspace</span>
+          </NavLink>
 
           <button
             onClick={logout}
-            className="flex items-center gap-1.5 text-zinc-400 hover:text-red-400 transition-colors"
+            className="flex items-center gap-1 text-zinc-500 hover:text-red-400 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Log Out</span>

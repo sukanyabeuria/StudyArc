@@ -30,13 +30,13 @@ export const askGemini = async (question) => {
 
   if (!client) {
     throw new Error(
-      'Gemini API is not configured on the backend. Please add GEMINI_API_KEY to your .env file.'
+      'Gemini is not configured. Add your Google AI Studio API key as GEMINI_API_KEY in backend/.env, then restart the backend.'
     );
   }
 
   try {
     const response = await client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       contents: question,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,

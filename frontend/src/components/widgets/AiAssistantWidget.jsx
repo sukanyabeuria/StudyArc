@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { askGeminiAssistant } from '../../api/client';
-import { Bot, Send, User, Loader2 } from 'lucide-react';
+import { Bot, Send, User, Loader2, Maximize2, Minimize2, Sparkles } from 'lucide-react';
 
 export default function AiAssistantWidget() {
   const [messages, setMessages] = useState([
@@ -12,13 +12,15 @@ export default function AiAssistantWidget() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const messagesEndRef = useRef(null);
 
   const promptChips = [
-    'Explain concept',
+    'Explain this concept',
     'Summarize notes',
-    'Study tips'
+    'Give study tips',
+    'Solve this problem'
   ];
 
   const scrollToBottom = () => {
@@ -69,8 +71,8 @@ export default function AiAssistantWidget() {
     }
   };
 
-  return (
-    <div className="bg-[#0b0c0f] border border-zinc-850 rounded-2xl p-3.5 shadow-xl flex flex-col justify-between h-full overflow-hidden text-zinc-100">
+  const renderContent = (isModal = false) => (
+    <div className={`flex flex-col justify-between h-full text-zinc-100 ${isModal ? 'max-w-4xl w-full h-[85vh] p-6 bg-[#0b0c0f] border border-zinc-800 rounded-3xl shadow-2xl' : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
@@ -78,9 +80,9 @@ export default function AiAssistantWidget() {
             <Bot className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1">
+            <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1.5">
               <span>AI Study Assistant</span>
-              <span className="px-1 py-0.2 rounded text-[9px] bg-orange-500/20 text-orange-300 font-semibold">
+              <span className="px-1 py-0.2 rounded text-[9px] bg-orange-500/20 text-orange-300 font-semibold border border-orange-500/30">
                 Gemini
               </span>
             </h3>
@@ -88,11 +90,22 @@ export default function AiAssistantWidget() {
           </div>
         </div>
 
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Ready" />
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Ready" />
+          
+          {/* Full Screen / Maximize Button */}
+          <button
+            onClick={() => setIsFullScreen(!isFullScreen)}
+            className="p-1 rounded-md text-zinc-400 hover:text-orange-400 hover:bg-zinc-850 transition-colors"
+            title={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+          >
+            {isFullScreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
+        </div>
       </div>
 
-      {/* Messages Scroll Area with custom-scrollbar */}
-      <div className="custom-scrollbar flex-1 overflow-y-auto space-y-2 pr-1 text-xs mb-2">
+      {/* Messages Scroll Area */}
+      <div className={`custom-scrollbar flex-1 overflow-y-auto space-y-2 pr-1 text-xs mb-2 ${isModal ? 'max-h-[60vh] text-sm space-y-3' : 'min-h-0'}`}>
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -108,6 +121,8 @@ export default function AiAssistantWidget() {
 
             <div
               className={`p-2.5 rounded-xl max-w-[88%] whitespace-pre-wrap leading-relaxed text-[11px] ${
+                isModal ? 'text-xs p-3.5' : ''
+              } ${
                 msg.role === 'user'
                   ? 'bg-orange-500 text-white rounded-tr-none'
                   : 'bg-zinc-950 border border-zinc-850 text-zinc-200 rounded-tl-none'
@@ -128,7 +143,7 @@ export default function AiAssistantWidget() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggestion Chips */}
+      {/* Suggestion Prompt Chips */}
       <div className="flex items-center gap-1 mb-1.5 overflow-x-auto pb-0.5">
         {promptChips.map((chip, idx) => (
           <button
@@ -142,13 +157,13 @@ export default function AiAssistantWidget() {
         ))}
       </div>
 
-      {/* Input */}
+      {/* Input Form */}
       <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-1.5 pt-1 border-t border-zinc-850">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question..."
+          placeholder="Ask a study question..."
           className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-[11px] text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-orange-500"
         />
         <button
@@ -160,5 +175,19 @@ export default function AiAssistantWidget() {
         </button>
       </form>
     </div>
+  );
+
+  return (
+    <>
+      <div className="bg-[#0b0c0f] border border-zinc-850 rounded-2xl p-3 shadow-xl flex flex-col justify-between h-full overflow-hidden text-zinc-100">
+        {renderContent(false)}
+      </div>
+
+      {isFullScreen && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl p-4 sm:p-8 flex items-center justify-center animate-in fade-in duration-200">
+          {renderContent(true)}
+        </div>
+      )}
+    </>
   );
 }

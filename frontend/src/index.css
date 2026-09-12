@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-focus-950 text-zinc-100 font-sans antialiased overflow-x-hidden;
+    background-color: #0b0d12;
+  }
+}
+
+/* Custom Cozy Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f1218;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b3343;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+/* Pulse Glow Animation */
+@keyframes warmPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(249, 115, 22, 0.45);
+  }
+}
+
+.animate-warm-pulse {
+  animation: warmPulse 4s infinite ease-in-out;
+}

@@ -176,95 +176,98 @@ export default function MusicRoomWidget() {
         </div>
       </div>
 
-      {/* YouTube Player Screen or Active Radio Banner */}
-      {activeVideoId ? (
-        <div className={`relative rounded-xl overflow-hidden mb-2 border border-zinc-800 bg-black ${isModal ? 'aspect-video w-full' : 'aspect-video'}`}>
-          <iframe
-            className="w-full h-full"
-            src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?autoplay=1&enablejsapi=1&rel=0`}
-            title="FocusNest LoFi Player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-          <button
-            onClick={handleCloseVideo}
-            className="absolute top-2 right-2 bg-black/80 hover:bg-black text-white p-1 rounded-full backdrop-blur-sm border border-zinc-700"
-            title="Close video"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      ) : (
-        <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-850 flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isPlaying ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-zinc-900 text-zinc-400'}`}>
-              {isPlaying ? <Radio className="w-3.5 h-3.5 animate-pulse" /> : <Music className="w-3.5 h-3.5" />}
+      {/* Scrollable Body with Prominent Scrollbar (Requested by User) */}
+      <div className={`custom-scrollbar-orange flex-1 min-h-0 overflow-y-auto space-y-2 pr-1 mb-1.5 ${isModal ? 'max-h-[65vh]' : ''}`}>
+        {/* YouTube Player Screen or Active Radio Banner */}
+        {activeVideoId ? (
+          <div className={`relative rounded-xl overflow-hidden border border-zinc-800 bg-black ${isModal ? 'aspect-video w-full' : 'aspect-video'}`}>
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?autoplay=1&enablejsapi=1&rel=0`}
+              title="FocusNest LoFi Player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+            <button
+              onClick={handleCloseVideo}
+              className="absolute top-2 right-2 bg-black/80 hover:bg-black text-white p-1 rounded-full backdrop-blur-sm border border-zinc-700"
+              title="Close video"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-850 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isPlaying ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-zinc-900 text-zinc-400'}`}>
+                {isPlaying ? <Radio className="w-3.5 h-3.5 animate-pulse" /> : <Music className="w-3.5 h-3.5" />}
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-white truncate">{currentStation.title}</h4>
+                <p className="text-[10px] text-zinc-500 flex items-center gap-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-emerald-500 animate-ping' : 'bg-zinc-700'}`} />
+                  <span>{isPlaying ? 'Live' : 'Ready'}</span>
+                  <span>·</span>
+                  <span className="text-orange-400">{currentStation.category}</span>
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <h4 className="text-xs font-bold text-white truncate">{currentStation.title}</h4>
-              <p className="text-[10px] text-zinc-500 flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-emerald-500 animate-ping' : 'bg-zinc-700'}`} />
-                <span>{isPlaying ? 'Live' : 'Ready'}</span>
-                <span>·</span>
-                <span className="text-orange-400">{currentStation.category}</span>
-              </p>
-            </div>
+
+            <button
+              onClick={togglePlay}
+              className="w-7 h-7 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-500/30 active:scale-95 transition-all shrink-0"
+            >
+              {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
+            </button>
+          </div>
+        )}
+
+        {/* Exactly TWO Default Stations with Visible Scroll Bar */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[10px] text-zinc-500 font-semibold px-1">
+            <span>STATIONS</span>
+            <span>2 channels · scrollable</span>
           </div>
 
-          <button
-            onClick={togglePlay}
-            className="w-7 h-7 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-500/30 active:scale-95 transition-all shrink-0"
-          >
-            {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
-          </button>
-        </div>
-      )}
+          <div className={`custom-scrollbar-orange overflow-y-scroll space-y-1 pr-1.5 ${isModal ? 'max-h-[140px]' : 'max-h-[62px]'}`}>
+            {STATIONS.map((station, idx) => {
+              const Icon = station.icon;
+              const isCurrent = currentTrackIndex === idx && !activeVideoId;
+              return (
+                <button
+                  key={station.id}
+                  type="button"
+                  onClick={() => selectStation(idx)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all text-left ${
+                    isCurrent
+                      ? 'bg-orange-500/15 border border-orange-500/30 text-white font-semibold'
+                      : 'bg-zinc-900/60 hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-850/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isCurrent ? 'text-orange-400' : 'text-zinc-500'}`} />
+                    <span className="truncate text-[11px]">{station.title}</span>
+                  </div>
 
-      {/* Exactly TWO Default Stations */}
-      <div className="space-y-1 mb-2">
-        <div className="flex items-center justify-between text-[10px] text-zinc-500 font-semibold px-1">
-          <span>STATIONS</span>
-          <span>2 channels</span>
-        </div>
-
-        <div className="space-y-1">
-          {STATIONS.map((station, idx) => {
-            const Icon = station.icon;
-            const isCurrent = currentTrackIndex === idx && !activeVideoId;
-            return (
-              <button
-                key={station.id}
-                type="button"
-                onClick={() => selectStation(idx)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all text-left ${
-                  isCurrent
-                    ? 'bg-orange-500/15 border border-orange-500/30 text-white font-semibold'
-                    : 'bg-zinc-900/60 hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-850/60'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isCurrent ? 'text-orange-400' : 'text-zinc-500'}`} />
-                  <span className="truncate text-[11px]">{station.title}</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[9px] text-zinc-500 uppercase px-1.5 py-0.2 rounded bg-zinc-800">
-                    {station.category}
-                  </span>
-                  {isCurrent && isPlaying ? (
-                    <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
-                  ) : (
-                    <Play className="w-2.5 h-2.5 text-zinc-600" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-[9px] text-zinc-500 uppercase px-1.5 py-0.2 rounded bg-zinc-800">
+                      {station.category}
+                    </span>
+                    {isCurrent && isPlaying ? (
+                      <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
+                    ) : (
+                      <Play className="w-2.5 h-2.5 text-zinc-600" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Prominently Shown YouTube Link & Input Form (as requested) */}
-      <div className="pt-2 border-t border-zinc-850 space-y-1.5">
+      <div className="shrink-0 pt-2 border-t border-zinc-850 space-y-1.5">
         {/* Active YouTube Link Display */}
         <div className="flex items-center justify-between px-1 text-[10px] text-zinc-400">
           <span className="flex items-center gap-1">

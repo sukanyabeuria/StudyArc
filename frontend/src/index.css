@@ -40,9 +40,15 @@
   background: #f97316;
 }
 
-/* Explicit custom scrollbar class for widget lists */
+/* Explicit custom scrollbar class for widget lists (Todo, Leaderboard, AI Chat) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #52525b #111317;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
+  height: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -51,11 +57,36 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: #52525b;
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
+
+/* Prominent Orange Scrollbar for Music Room (Requested by User) */
+.custom-scrollbar-orange {
+  scrollbar-width: thin;
+  scrollbar-color: #f97316 #14161b;
+}
+
+.custom-scrollbar-orange::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar-orange::-webkit-scrollbar-track {
+  background: #14161b;
+  border-radius: 4px;
+}
+
+.custom-scrollbar-orange::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 4px;
+}
+
+.custom-scrollbar-orange::-webkit-scrollbar-thumb:hover {
   background: #ea580c;
 }
 

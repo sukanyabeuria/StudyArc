@@ -364,7 +364,7 @@ export default function LandingView() {
       badge: 'AI Powered',
       tag: '03',
       desc: 'Break down complex algorithms, debug tricky code snippets, or get intuitive concept analogies in seconds.',
-      image: '/lofi-bg.jpg'
+      image: '/gemini-ai.png'
     },
     {
       id: 'leaderboard',

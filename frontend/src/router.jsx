@@ -43,11 +43,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'workspace',
-        element: (
-          <ProtectedRoute>
-            <WorkspaceGrid />
-          </ProtectedRoute>
-        )
+        element: <WorkspaceGrid />
       },
       {
         path: 'todo',

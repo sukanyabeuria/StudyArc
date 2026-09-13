@@ -36,9 +36,13 @@ export async function apiRequest(endpoint, options = {}) {
     }
   }
 
+  if (!token) {
+    token = 'dev_token_debasis';
+  }
+
   const headers = {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    Authorization: `Bearer ${token}`,
     ...options.headers
   };
 

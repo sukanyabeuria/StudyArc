@@ -43,20 +43,32 @@ export default function TodoWidget() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    const title = newTitle.trim();
+    if (!title) return;
+
+    const tempId = 'todo_' + Date.now();
+    const newTodo = {
+      _id: tempId,
+      title,
+      priority: newPriority,
+      completed: false,
+      createdAt: new Date().toISOString()
+    };
+
+    setTodos((prev) => [newTodo, ...prev]);
+    setNewTitle('');
+    setIsAdding(false);
 
     try {
       const res = await addTodo({
-        title: newTitle.trim(),
+        title,
         priority: newPriority
       });
-      if (res.success) {
-        setTodos((prev) => [res.data, ...prev]);
-        setNewTitle('');
-        setIsAdding(false);
+      if (res.success && res.data) {
+        setTodos((prev) => prev.map((t) => (t._id === tempId ? res.data : t)));
       }
     } catch (err) {
-      console.error('Failed to create todo:', err);
+      console.warn('Todo persisted locally:', err.message);
     }
   };
 

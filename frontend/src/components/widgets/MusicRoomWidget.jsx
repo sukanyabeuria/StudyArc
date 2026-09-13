@@ -10,7 +10,8 @@ import {
   Coffee,
   Maximize2,
   Minimize2,
-  Video
+  Video,
+  ExternalLink
 } from 'lucide-react';
 
 export default function MusicRoomWidget() {
@@ -117,16 +118,15 @@ export default function MusicRoomWidget() {
     setActiveVideoId('');
   };
 
+  const activeYoutubeUrl = activeVideoId
+    ? `https://www.youtube.com/watch?v=${activeVideoId}`
+    : currentStation.defaultYoutubeId
+    ? `https://www.youtube.com/watch?v=${currentStation.defaultYoutubeId}`
+    : '';
+
   // Content render function for both normal and fullscreen views
   const renderContent = (isModal = false) => (
     <div className={`flex flex-col justify-between h-full text-zinc-100 ${isModal ? 'max-w-3xl w-full p-6 bg-[#0b0c0f] border border-zinc-800 rounded-3xl shadow-2xl' : ''}`}>
-      {/* Hidden Audio Stream */}
-      <audio
-        ref={audioRef}
-        src={currentStation.streamUrl}
-        preload="none"
-        onEnded={() => setIsPlaying(false)}
-      />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
@@ -267,6 +267,26 @@ export default function MusicRoomWidget() {
 
       {/* Streamlined YouTube Link & Input Form */}
       <div className="shrink-0 pt-2 border-t border-zinc-850/80 space-y-1.5">
+        {/* Active YouTube Link Display */}
+        {activeYoutubeUrl && (
+          <div className="flex items-center justify-between px-1 text-[10px] text-zinc-400">
+            <span className="flex items-center gap-1">
+              <Video className="w-3 h-3 text-red-500" />
+              <span className="font-semibold text-zinc-300">YouTube Link:</span>
+            </span>
+            <a
+              href={activeYoutubeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-orange-400 hover:text-orange-300 underline truncate max-w-[170px] flex items-center gap-0.5"
+              title={activeYoutubeUrl}
+            >
+              <span className="truncate">{activeYoutubeUrl.replace('https://www.', '')}</span>
+              <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+            </a>
+          </div>
+        )}
+
         <form onSubmit={handlePlayYoutube} className="flex items-center gap-1.5">
           <div className="relative flex-1">
             <Video className="w-3 h-3 text-red-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -291,6 +311,14 @@ export default function MusicRoomWidget() {
 
   return (
     <>
+      {/* Singleton Audio Stream */}
+      <audio
+        ref={audioRef}
+        src={currentStation.streamUrl}
+        preload="none"
+        onEnded={() => setIsPlaying(false)}
+      />
+
       {/* Standard Compact Grid Card */}
       <div className="bg-[#0b0c0f] border border-zinc-850 rounded-2xl p-3 shadow-xl flex flex-col justify-between h-full overflow-hidden text-zinc-100">
         {renderContent(false)}

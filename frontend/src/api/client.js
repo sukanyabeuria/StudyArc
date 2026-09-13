@@ -1,3 +1,5 @@
+import { auth } from '../config/firebase';
+
 const API_PORT = 5000;
 const host =
   typeof window !== 'undefined' && window.location.hostname
@@ -22,7 +24,17 @@ const BASE_URL = resolvedBaseUrl;
  * Injects Authorization header and parses standard API response payload
  */
 export async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('studyarc_token') || localStorage.getItem('focusnest_token');
+  let token = localStorage.getItem('studyarc_token') || localStorage.getItem('focusnest_token');
+
+  // If user is actively authenticated with Firebase, ensure token is fresh
+  if (auth && auth.currentUser) {
+    try {
+      token = await auth.currentUser.getIdToken();
+      localStorage.setItem('studyarc_token', token);
+    } catch (err) {
+      console.warn('[API Client] Token refresh warning:', err.message);
+    }
+  }
 
   const headers = {
     'Content-Type': 'application/json',

@@ -1,15 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, User, Eye, EyeOff, X, Sparkles } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, X, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { animateModalOpen, animateModalClose } from '../../animations/microInteractions';
 
 export default function AuthModal() {
-  const { authModalOpen, authModalMode, closeAuthModal, openAuthModal, devLogin } = useAuth();
+  const {
+    authModalOpen,
+    authModalMode,
+    closeAuthModal,
+    openAuthModal,
+    devLogin,
+    login,
+    signup,
+    loginWithGoogle,
+    loginWithGithub,
+    authError,
+    clearAuthError,
+    isFirebaseConfigured
+  } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState('Debasis');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+  const [loading, setLoading] = useState(false);
   const modalCardRef = useRef(null);
   const backdropRef = useRef(null);
 
@@ -24,6 +39,7 @@ export default function AuthModal() {
   const isLogin = authModalMode === 'login';
 
   const handleClose = () => {
+    clearAuthError();
     if (modalCardRef.current) {
       animateModalClose(modalCardRef.current, backdropRef.current, closeAuthModal);
     } else {
@@ -31,16 +47,68 @@ export default function AuthModal() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In dev environment, logs in smoothly with username
-    const username = !isLogin && name ? name : email.split('@')[0] || 'Debasis';
-    devLogin(username);
+    clearAuthError();
+    setLoading(true);
+
+    try {
+      if (isFirebaseConfigured) {
+        if (isLogin) {
+          await login(email, password);
+        } else {
+          await signup(email, password, name || 'Focus Learner');
+        }
+      } else {
+        // Transparent development fallback when Firebase credentials are not yet configured in Vercel
+        const username = !isLogin && name ? name : email.split('@')[0] || 'Debasis';
+        devLogin(username);
+      }
+    } catch (err) {
+      console.error('[AuthModal Error]:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    clearAuthError();
+    setLoading(true);
+    try {
+      if (isFirebaseConfigured) {
+        await loginWithGoogle();
+      } else {
+        devLogin('Google Student');
+      }
+    } catch (err) {
+      console.error('[Google Auth Modal Error]:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithubAuth = async () => {
+    clearAuthError();
+    setLoading(true);
+    try {
+      if (isFirebaseConfigured) {
+        await loginWithGithub();
+      } else {
+        devLogin('Github Coder');
+      }
+    } catch (err) {
+      console.error('[GitHub Auth Modal Error]:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div ref={backdropRef} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md perspective-1000">
-      <div 
+    <div
+      ref={backdropRef}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md perspective-1000"
+    >
+      <div
         ref={modalCardRef}
         className="relative w-full max-w-md bg-focus-900/95 border border-zinc-800/80 rounded-2xl p-7 shadow-2xl shadow-orange-950/20 text-zinc-100 preserve-3d will-change-transform"
         style={{
@@ -49,6 +117,7 @@ export default function AuthModal() {
       >
         {/* Close Button */}
         <button
+          type="button"
           onClick={handleClose}
           className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-100 rounded-lg hover:bg-zinc-800/60 transition-colors"
         >
@@ -78,6 +147,16 @@ export default function AuthModal() {
           </p>
         </div>
 
+        {/* Error Notification Banner */}
+        {authError && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-200">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="leading-relaxed flex-1">
+              <span>{authError}</span>
+            </div>
+          </div>
+        )}
+
         {/* Quick Demo Login Banner */}
         <div className="mb-5 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -86,7 +165,10 @@ export default function AuthModal() {
           </div>
           <button
             type="button"
-            onClick={() => devLogin('Debasis')}
+            onClick={() => {
+              clearAuthError();
+              devLogin('Debasis');
+            }}
             className="px-3 py-1 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors shadow-sm shadow-orange-500/30"
           >
             Log In as Debasis
@@ -133,7 +215,8 @@ export default function AuthModal() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                placeholder="Password (min. 6 characters)"
+                minLength={6}
                 className="w-full bg-focus-850 border border-zinc-800 rounded-xl pl-10 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-orange-500/70 focus:ring-1 focus:ring-orange-500/50 transition-all"
               />
               <button
@@ -165,9 +248,11 @@ export default function AuthModal() {
 
           <button
             type="submit"
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium rounded-xl text-sm transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-[0.99] mt-2"
+            disabled={loading}
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-60 text-white font-medium rounded-xl text-sm transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-[0.99] mt-2 flex items-center justify-center gap-2"
           >
-            {isLogin ? 'Log In' : 'Sign Up'}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            <span>{loading ? 'Please wait...' : isLogin ? 'Log In' : 'Sign Up'}</span>
           </button>
         </form>
 
@@ -185,8 +270,9 @@ export default function AuthModal() {
         <div className="space-y-2">
           <button
             type="button"
-            onClick={() => devLogin('Google Student')}
-            className="w-full flex items-center justify-center gap-2.5 py-2 px-4 bg-focus-850 hover:bg-focus-800 border border-zinc-800/80 rounded-xl text-xs font-medium text-zinc-200 transition-colors"
+            onClick={handleGoogleAuth}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2.5 py-2 px-4 bg-focus-850 hover:bg-focus-800 border border-zinc-800/80 rounded-xl text-xs font-medium text-zinc-200 transition-colors disabled:opacity-60"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -211,8 +297,9 @@ export default function AuthModal() {
 
           <button
             type="button"
-            onClick={() => devLogin('Github Coder')}
-            className="w-full flex items-center justify-center gap-2.5 py-2 px-4 bg-focus-850 hover:bg-focus-800 border border-zinc-800/80 rounded-xl text-xs font-medium text-zinc-200 transition-colors"
+            onClick={handleGithubAuth}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2.5 py-2 px-4 bg-focus-850 hover:bg-focus-800 border border-zinc-800/80 rounded-xl text-xs font-medium text-zinc-200 transition-colors disabled:opacity-60"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
@@ -226,7 +313,10 @@ export default function AuthModal() {
           {isLogin ? "Don't have an account? " : 'Already have an account? '}
           <button
             type="button"
-            onClick={() => openAuthModal(isLogin ? 'signup' : 'login')}
+            onClick={() => {
+              clearAuthError();
+              openAuthModal(isLogin ? 'signup' : 'login');
+            }}
             className="text-orange-400 font-semibold hover:text-orange-300 transition-colors ml-1"
           >
             {isLogin ? 'Sign Up' : 'Log In'}

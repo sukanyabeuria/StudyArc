@@ -8,11 +8,11 @@ const host =
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
 let resolvedBaseUrl;
-if (rawApiUrl && rawApiUrl.trim()) {
+if (host === 'localhost' || host === '127.0.0.1') {
+  resolvedBaseUrl = `http://${host}:${API_PORT}/api`;
+} else if (rawApiUrl && rawApiUrl.trim()) {
   const trimmed = rawApiUrl.trim().replace(/\/+$/, '');
   resolvedBaseUrl = trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
-} else if (host === 'localhost' || host === '127.0.0.1') {
-  resolvedBaseUrl = `http://${host}:${API_PORT}/api`;
 } else {
   // Production default Render backend endpoint for Vercel deployment
   resolvedBaseUrl = 'https://studyarc-backend.onrender.com/api';

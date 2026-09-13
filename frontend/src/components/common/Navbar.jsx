@@ -50,7 +50,7 @@ export default function Navbar() {
           <NavLink
             key={link.to}
             to={link.to}
-            onClick={(e) => link.to !== '/' && link.to !== '/workspace' && handleProtectedNav(e)}
+            onClick={(e) => link.to !== '/' && handleProtectedNav(e)}
             className={({ isActive }) =>
               `relative px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 isActive
@@ -62,7 +62,7 @@ export default function Navbar() {
             {({ isActive }) => (
               <>
                 <span>{link.label}</span>
-                {!isAuthenticated && link.to !== '/' && link.to !== '/workspace' && <Lock className="w-3 h-3 text-zinc-500" />}
+                {!isAuthenticated && link.to !== '/' && <Lock className="w-3 h-3 text-zinc-500" />}
                 {isActive && (
                   <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-gradient-to-r from-orange-500 to-amber-400 rounded-full shadow-[0_0_6px_rgba(249,115,22,0.8)]" />
                 )}

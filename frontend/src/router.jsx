@@ -35,31 +35,59 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <CozyRoomView />
+        element: (
+          <ProtectedRoute>
+            <CozyRoomView />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'study-room',
-        element: <CozyRoomView />
+        element: (
+          <ProtectedRoute>
+            <CozyRoomView />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'workspace',
-        element: <WorkspaceGrid />
+        element: (
+          <ProtectedRoute>
+            <WorkspaceGrid />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'todo',
-        element: <WorkspaceGrid />
+        element: (
+          <ProtectedRoute>
+            <WorkspaceGrid />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'pomodoro',
-        element: <WorkspaceGrid />
+        element: (
+          <ProtectedRoute>
+            <WorkspaceGrid />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'music',
-        element: <WorkspaceGrid />
+        element: (
+          <ProtectedRoute>
+            <WorkspaceGrid />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'ai',
-        element: <WorkspaceGrid />
+        element: (
+          <ProtectedRoute>
+            <WorkspaceGrid />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'leaderboard',

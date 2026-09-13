@@ -17,7 +17,7 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: CLIENT_URL
-        sync: false
+        value: "https://study-arc-muyw.vercel.app"
       - key: ALLOW_DEV_AUTH
         value: "true"
       - key: FIREBASE_PROJECT_ID

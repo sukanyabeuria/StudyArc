@@ -36,8 +36,8 @@ export const askGemini = async (question) => {
     );
   }
 
-  // Attempt with primary model, fall back gracefully if model name shifts
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-2.0-flash'];
+  // Attempt with primary models that are active in Google AI Studio
+  const modelsToTry = ['gemini-3.6-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
   let lastError = null;
 
   for (const model of modelsToTry) {

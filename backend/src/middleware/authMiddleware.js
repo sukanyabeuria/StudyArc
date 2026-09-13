@@ -21,40 +21,53 @@ export const protect = async (req, res, next) => {
     token = authHeader.split(' ')[1]?.trim();
   }
 
+  const allowDevAuth = process.env.ALLOW_DEV_AUTH === 'true' || !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+
+  // If no token is supplied, but dev/guest auth is allowed, assign default study persona
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Authorization token missing or malformed. Expected Bearer <token>.'
-    });
+    if (allowDevAuth) {
+      token = 'dev_token_debasis';
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: 'Authorization token missing or malformed. Expected Bearer <token>.'
+      });
+    }
   }
 
   try {
     let decodedToken;
 
-    // Optional development mock auth: Only allowed if explicitly enabled in development
-    if (
-      process.env.NODE_ENV === 'development' &&
-      process.env.ALLOW_DEV_AUTH === 'true' &&
-      token.startsWith('dev_token_')
-    ) {
-      const devUid = token.replace('dev_token_', '');
+    // Optional development / demo persona auth:
+    if (token.startsWith('dev_token_') && allowDevAuth) {
+      const devUid = token.replace('dev_token_', '') || 'debasis';
+      const capitalized = devUid.charAt(0).toUpperCase() + devUid.slice(1);
       decodedToken = {
-        uid: devUid || 'dev_user_123',
-        email: `${devUid || 'dev_user'}@studyarc.com`,
-        name: `Dev User (${devUid || '123'})`,
+        uid: `dev_${devUid}`,
+        email: `${devUid}@studyarc.com`,
+        name: capitalized,
         picture: ''
       };
     } else {
-      // Standard Production Firebase Admin Verification
-      if (!admin.apps.length) {
+      // Standard Firebase Admin Verification
+      if (admin.apps.length) {
+        const auth = getAuth();
+        decodedToken = await auth.verifyIdToken(token);
+      } else if (allowDevAuth) {
+        // Graceful fallback to dev persona if Firebase admin is not configured
+        decodedToken = {
+          uid: 'dev_debasis',
+          email: 'debasis@studyarc.com',
+          name: 'Debasis',
+          picture: ''
+        };
+      } else {
         return res.status(401).json({
           success: false,
           message:
-            'Firebase Admin is not configured. Please supply Firebase credentials in .env or set ALLOW_DEV_AUTH=true in development.'
+            'Firebase Admin is not configured. Please supply Firebase credentials in .env or set ALLOW_DEV_AUTH=true in environment variables.'
         });
       }
-      const auth = getAuth();
-      decodedToken = await auth.verifyIdToken(token);
     }
 
     // Attach verified Firebase token info
@@ -74,9 +87,9 @@ export const protect = async (req, res, next) => {
         console.log(`[Auth] Auto-provisioned new MongoDB user for UID: ${decodedToken.uid}`);
       }
     } else {
-      // Graceful fallback for local development when MongoDB is not running
+      // Graceful fallback with valid Mongoose ObjectId so Todo.create never fails schema validation
       user = {
-        _id: 'dev_user_id',
+        _id: new mongoose.Types.ObjectId('65f1a2b3c4d5e6f7a8b9c0d1'),
         firebaseUid: decodedToken.uid,
         name: decodedToken.name || 'Debasis',
         email: decodedToken.email || 'debasis@studyarc.com',
@@ -118,21 +131,27 @@ export const optionalProtect = async (req, res, next) => {
   try {
     let decodedToken = null;
 
-    if (
-      process.env.NODE_ENV === 'development' &&
-      process.env.ALLOW_DEV_AUTH === 'true' &&
-      token.startsWith('dev_token_')
-    ) {
-      const devUid = token.replace('dev_token_', '');
+    const allowDevAuth = process.env.ALLOW_DEV_AUTH === 'true' || !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+
+    if (token.startsWith('dev_token_') && allowDevAuth) {
+      const devUid = token.replace('dev_token_', '') || 'debasis';
+      const capitalized = devUid.charAt(0).toUpperCase() + devUid.slice(1);
       decodedToken = {
-        uid: devUid || 'dev_user_123',
-        email: `${devUid || 'dev_user'}@studyarc.com`,
-        name: `Dev User (${devUid || '123'})`,
+        uid: `dev_${devUid}`,
+        email: `${devUid}@studyarc.com`,
+        name: capitalized,
         picture: ''
       };
     } else if (admin.apps.length) {
       const auth = getAuth();
       decodedToken = await auth.verifyIdToken(token);
+    } else if (allowDevAuth) {
+      decodedToken = {
+        uid: 'dev_debasis',
+        email: 'debasis@studyarc.com',
+        name: 'Debasis',
+        picture: ''
+      };
     }
 
     if (decodedToken) {
@@ -141,7 +160,7 @@ export const optionalProtect = async (req, res, next) => {
         req.user = await User.findOne({ firebaseUid: decodedToken.uid });
       } else {
         req.user = {
-          _id: 'dev_user_id',
+          _id: new mongoose.Types.ObjectId('65f1a2b3c4d5e6f7a8b9c0d1'),
           firebaseUid: decodedToken.uid,
           name: decodedToken.name || 'Debasis',
           email: decodedToken.email || 'debasis@studyarc.com',

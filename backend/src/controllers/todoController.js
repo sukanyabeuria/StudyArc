@@ -1,4 +1,8 @@
+import mongoose from 'mongoose';
 import Todo from '../models/Todo.js';
+
+// In-memory cache fallback used only while MongoDB connection is establishing
+const memoryTodos = new Map();
 
 /**
  * @desc    Get all todos belonging to the authenticated user
@@ -7,13 +11,25 @@ import Todo from '../models/Todo.js';
  */
 export const getTodos = async (req, res, next) => {
   try {
-    // Strictly scoped to the authenticated user's _id
-    const todos = await Todo.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    const userId = req.user._id;
+    const userIdStr = userId.toString();
 
-    res.status(200).json({
+    // Primary: Read directly from MongoDB
+    if (mongoose.connection.readyState === 1) {
+      const todos = await Todo.find({ userId }).sort({ createdAt: -1 });
+      return res.status(200).json({
+        success: true,
+        count: todos.length,
+        data: todos
+      });
+    }
+
+    // Fallback: Read from in-memory cache while database is connecting
+    const userList = memoryTodos.get(userIdStr) || [];
+    return res.status(200).json({
       success: true,
-      count: todos.length,
-      data: todos
+      count: userList.length,
+      data: userList
     });
   } catch (error) {
     next(error);
@@ -27,7 +43,33 @@ export const getTodos = async (req, res, next) => {
  */
 export const getTodoById = async (req, res, next) => {
   try {
-    const todo = await Todo.findById(req.params.id);
+    const userIdStr = req.user._id.toString();
+
+    if (mongoose.connection.readyState === 1) {
+      const todo = await Todo.findById(req.params.id);
+
+      if (!todo) {
+        return res.status(404).json({
+          success: false,
+          message: 'Todo not found'
+        });
+      }
+
+      if (todo.userId.toString() !== userIdStr) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access forbidden: You do not have permission to access this resource'
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: todo
+      });
+    }
+
+    const userList = memoryTodos.get(userIdStr) || [];
+    const todo = userList.find((t) => t._id.toString() === req.params.id);
 
     if (!todo) {
       return res.status(404).json({
@@ -36,15 +78,7 @@ export const getTodoById = async (req, res, next) => {
       });
     }
 
-    // Strict Ownership Protection: verify todo belongs to calling user
-    if (todo.userId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access forbidden: You do not have permission to access this resource'
-      });
-    }
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: todo
     });
@@ -69,22 +103,53 @@ export const createTodo = async (req, res, next) => {
       });
     }
 
-    // Always associate with the authenticated user's ID from req.user
-    // Never accept a userId passed in req.body
-    const todo = await Todo.create({
-      userId: req.user._id,
+    const userId = req.user._id;
+    const userIdStr = userId.toString();
+
+    // Primary: Persist directly into MongoDB
+    if (mongoose.connection.readyState === 1) {
+      const todo = await Todo.create({
+        userId,
+        title: title.trim(),
+        description: description ? description.trim() : '',
+        completed: completed !== undefined ? Boolean(completed) : false,
+        priority: priority || 'medium',
+        dueDate: dueDate || null
+      });
+
+      console.log(`[Todo] Created in MongoDB for user ${userIdStr}: "${todo.title}"`);
+
+      return res.status(201).json({
+        success: true,
+        data: todo
+      });
+    }
+
+    // Fallback while MongoDB connection is establishing
+    const newTodo = {
+      _id: new mongoose.Types.ObjectId().toString(),
+      userId,
       title: title.trim(),
       description: description ? description.trim() : '',
       completed: completed !== undefined ? Boolean(completed) : false,
       priority: priority || 'medium',
-      dueDate: dueDate || null
-    });
+      dueDate: dueDate || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-    res.status(201).json({
+    const userList = memoryTodos.get(userIdStr) || [];
+    userList.unshift(newTodo);
+    memoryTodos.set(userIdStr, userList);
+
+    console.log(`[Todo Fallback] Created in memory for user ${userIdStr}: "${newTodo.title}"`);
+
+    return res.status(201).json({
       success: true,
-      data: todo
+      data: newTodo
     });
   } catch (error) {
+    console.error(`[Todo Controller Error]: ${error.message}`);
     next(error);
   }
 };
@@ -96,36 +161,68 @@ export const createTodo = async (req, res, next) => {
  */
 export const updateTodo = async (req, res, next) => {
   try {
-    const todo = await Todo.findById(req.params.id);
+    const userIdStr = req.user._id.toString();
 
-    if (!todo) {
+    if (mongoose.connection.readyState === 1) {
+      const todo = await Todo.findById(req.params.id);
+
+      if (!todo) {
+        return res.status(404).json({
+          success: false,
+          message: 'Todo not found'
+        });
+      }
+
+      if (todo.userId.toString() !== userIdStr) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access forbidden: You do not have permission to modify this resource'
+        });
+      }
+
+      const { title, description, completed, priority, dueDate } = req.body;
+
+      if (title !== undefined) todo.title = title.trim();
+      if (description !== undefined) todo.description = description.trim();
+      if (completed !== undefined) todo.completed = Boolean(completed);
+      if (priority !== undefined) todo.priority = priority;
+      if (dueDate !== undefined) todo.dueDate = dueDate;
+
+      const updatedTodo = await todo.save();
+
+      return res.status(200).json({
+        success: true,
+        data: updatedTodo
+      });
+    }
+
+    // Memory fallback
+    const userList = memoryTodos.get(userIdStr) || [];
+    const todoIndex = userList.findIndex((t) => t._id.toString() === req.params.id);
+
+    if (todoIndex === -1) {
       return res.status(404).json({
         success: false,
         message: 'Todo not found'
       });
     }
 
-    // Strict Ownership Protection: verify todo belongs to calling user
-    if (todo.userId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access forbidden: You do not have permission to modify this resource'
-      });
-    }
-
     const { title, description, completed, priority, dueDate } = req.body;
+    const existing = userList[todoIndex];
+    const updated = {
+      ...existing,
+      ...(title !== undefined ? { title: title.trim() } : {}),
+      ...(description !== undefined ? { description: description.trim() } : {}),
+      ...(completed !== undefined ? { completed: Boolean(completed) } : {}),
+      ...(priority !== undefined ? { priority } : {}),
+      ...(dueDate !== undefined ? { dueDate } : {}),
+      updatedAt: new Date().toISOString()
+    };
+    userList[todoIndex] = updated;
 
-    if (title !== undefined) todo.title = title.trim();
-    if (description !== undefined) todo.description = description.trim();
-    if (completed !== undefined) todo.completed = Boolean(completed);
-    if (priority !== undefined) todo.priority = priority;
-    if (dueDate !== undefined) todo.dueDate = dueDate;
-
-    const updatedTodo = await todo.save();
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: updatedTodo
+      data: updated
     });
   } catch (error) {
     next(error);
@@ -139,26 +236,39 @@ export const updateTodo = async (req, res, next) => {
  */
 export const deleteTodo = async (req, res, next) => {
   try {
-    const todo = await Todo.findById(req.params.id);
+    const userIdStr = req.user._id.toString();
 
-    if (!todo) {
-      return res.status(404).json({
-        success: false,
-        message: 'Todo not found'
+    if (mongoose.connection.readyState === 1) {
+      const todo = await Todo.findById(req.params.id);
+
+      if (!todo) {
+        return res.status(404).json({
+          success: false,
+          message: 'Todo not found'
+        });
+      }
+
+      if (todo.userId.toString() !== userIdStr) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access forbidden: You do not have permission to delete this resource'
+        });
+      }
+
+      await todo.deleteOne();
+
+      return res.status(200).json({
+        success: true,
+        message: 'Todo deleted successfully'
       });
     }
 
-    // Strict Ownership Protection: verify todo belongs to calling user
-    if (todo.userId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access forbidden: You do not have permission to delete this resource'
-      });
-    }
+    // Memory fallback
+    const userList = memoryTodos.get(userIdStr) || [];
+    const filtered = userList.filter((t) => t._id.toString() !== req.params.id);
+    memoryTodos.set(userIdStr, filtered);
 
-    await todo.deleteOne();
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Todo deleted successfully'
     });

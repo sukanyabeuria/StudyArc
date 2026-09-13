@@ -14,6 +14,7 @@ import {
   Minimize2,
   Video
 } from 'lucide-react';
+import { animateModalOpen } from '../../animations/microInteractions';
 
 export default function MusicRoomWidget() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,6 +26,13 @@ export default function MusicRoomWidget() {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const audioRef = useRef(null);
+  const fullScreenCardRef = useRef(null);
+
+  useEffect(() => {
+    if (isFullScreen && fullScreenCardRef.current) {
+      animateModalOpen(fullScreenCardRef.current);
+    }
+  }, [isFullScreen]);
 
   // Exactly TWO default music stations as requested
   const STATIONS = [
@@ -125,7 +133,10 @@ export default function MusicRoomWidget() {
 
   // Content render function for both normal and fullscreen views
   const renderContent = (isModal = false) => (
-    <div className={`flex flex-col justify-between h-full text-zinc-100 ${isModal ? 'max-w-3xl w-full p-6 bg-[#0b0c0f] border border-zinc-800 rounded-3xl shadow-2xl' : ''}`}>
+    <div
+      ref={isModal ? fullScreenCardRef : null}
+      className={`flex flex-col justify-between h-full text-zinc-100 ${isModal ? 'max-w-3xl w-full p-6 bg-[#0b0c0f] border border-zinc-800 rounded-3xl shadow-2xl preserve-3d' : ''}`}
+    >
       {/* Hidden Audio Stream */}
       <audio
         ref={audioRef}
@@ -137,10 +148,10 @@ export default function MusicRoomWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
+          <div className="tilt-depth-lg w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
             <Music className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="tilt-depth-md">
             <h3 className="text-xs font-bold text-white leading-none">Music Room</h3>
             <span className="text-[10px] text-zinc-500 font-medium">LoFi & YouTube</span>
           </div>
@@ -184,7 +195,7 @@ export default function MusicRoomWidget() {
             <iframe
               className="w-full h-full"
               src={`https://www.youtube-nocookie.com/embed/${activeVideoId}?autoplay=1&enablejsapi=1&rel=0`}
-              title="FocusNest LoFi Player"
+              title="StudyArc LoFi Player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
@@ -197,25 +208,33 @@ export default function MusicRoomWidget() {
             </button>
           </div>
         ) : (
-          <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-850 flex items-center justify-between">
+          <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-850 flex items-center justify-between hover:border-orange-500/30 transition-all">
             <div className="flex items-center gap-2 min-w-0">
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isPlaying ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-zinc-900 text-zinc-400'}`}>
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${isPlaying ? 'bg-orange-500 text-white shadow-md shadow-orange-500/40 scale-105' : 'bg-zinc-900 text-zinc-400'}`}>
                 {isPlaying ? <Radio className="w-3.5 h-3.5 animate-pulse" /> : <Music className="w-3.5 h-3.5" />}
               </div>
               <div className="min-w-0">
                 <h4 className="text-xs font-bold text-white truncate">{currentStation.title}</h4>
-                <p className="text-[10px] text-zinc-500 flex items-center gap-1">
+                <div className="text-[10px] text-zinc-500 flex items-center gap-1">
                   <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-emerald-500 animate-ping' : 'bg-zinc-700'}`} />
                   <span>{isPlaying ? 'Live' : 'Ready'}</span>
                   <span>·</span>
                   <span className="text-orange-400">{currentStation.category}</span>
-                </p>
+                  {isPlaying && (
+                    <span className="flex items-end gap-0.5 h-3 ml-1.5" title="Playing LoFi audio">
+                      <span className="w-0.5 bg-orange-400 rounded-full animate-pulse" style={{ height: '100%', animationDuration: '0.45s' }} />
+                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '65%', animationDuration: '0.35s', animationDelay: '0.1s' }} />
+                      <span className="w-0.5 bg-orange-500 rounded-full animate-pulse" style={{ height: '85%', animationDuration: '0.55s', animationDelay: '0.2s' }} />
+                      <span className="w-0.5 bg-amber-300 rounded-full animate-pulse" style={{ height: '50%', animationDuration: '0.4s', animationDelay: '0.15s' }} />
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             <button
               onClick={togglePlay}
-              className="w-7 h-7 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-500/30 active:scale-95 transition-all shrink-0"
+              className="w-7 h-7 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 active:scale-95 transition-all shrink-0"
             >
               {isPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current ml-0.5" />}
             </button>

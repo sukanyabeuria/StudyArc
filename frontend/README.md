@@ -1,4 +1,4 @@
-# 🦉 FocusNest Frontend
+# 🦉 StudyArc Frontend
 
 A cozy, gamified "Study Together" web application inspired by warm orange & black LoFi aesthetics.
 

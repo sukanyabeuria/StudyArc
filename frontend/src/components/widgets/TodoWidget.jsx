@@ -1,22 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { fetchTodos, addTodo, updateTodo, deleteTodo } from '../../api/client';
 import { Check, Plus, Trash2, CheckSquare } from 'lucide-react';
+import {
+  animateFloatingXp,
+  animateCheckboxPop,
+  animateTaskRowCompletion
+} from '../../animations/rewardAnimations';
+import { animateTabSwitch, useMagneticButton } from '../../animations/microInteractions';
+import { useAuth } from '../../context/AuthContext';
 
 export default function TodoWidget() {
+  const { awardXp } = useAuth();
   const [todos, setTodos] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState('medium');
+  const listRef = useRef(null);
+  const addBtnRef = useRef(null);
 
-  useEffect(() => {
-    loadTodos();
-  }, []);
+  useMagneticButton(addBtnRef, { strength: 0.25, maxDistance: 8 });
 
   const loadTodos = async () => {
     try {
-      setLoading(true);
       const res = await fetchTodos();
       if (res.success) {
         setTodos(res.data);
@@ -28,13 +36,62 @@ export default function TodoWidget() {
     }
   };
 
-  const handleToggle = async (todo) => {
+  useEffect(() => {
+    let ignore = false;
+    async function init() {
+      try {
+        const res = await fetchTodos();
+        if (!ignore && res.success) {
+          setTodos(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load todos:', err);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    init();
+    return () => { ignore = true; };
+  }, []);
+
+  // Stagger animate tasks when loaded
+  useEffect(() => {
+    if (!loading && listRef.current) {
+      const items = listRef.current.querySelectorAll('.todo-item-row');
+      if (items.length > 0) {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 6 },
+          { opacity: 1, y: 0, duration: 0.25, stagger: 0.03, ease: 'power2.out' }
+        );
+      }
+    }
+  }, [loading, filter]);
+
+  const handleToggle = async (todo, e) => {
     try {
-      const updated = !todo.completed;
+      const willBeCompleted = !todo.completed;
+      const rowElement = e?.currentTarget?.closest('.todo-item-row');
+      const checkboxElement = e?.currentTarget?.querySelector('.checkbox-box');
+
+      // Animate checkbox pop
+      if (checkboxElement) {
+        animateCheckboxPop(checkboxElement, willBeCompleted);
+      }
+
+      // If completing, spawn floating XP reward feedback and animate row
+      if (willBeCompleted && e?.currentTarget) {
+        animateFloatingXp(e.currentTarget, 15);
+        if (awardXp) awardXp(15);
+        if (rowElement) {
+          animateTaskRowCompletion(rowElement, true);
+        }
+      }
+
       setTodos((prev) =>
-        prev.map((t) => (t._id === todo._id ? { ...t, completed: updated } : t))
+        prev.map((t) => (t._id === todo._id ? { ...t, completed: willBeCompleted } : t))
       );
-      await updateTodo(todo._id, { completed: updated });
+      await updateTodo(todo._id, { completed: willBeCompleted });
     } catch (err) {
       console.error('Failed to update todo:', err);
       loadTodos();
@@ -60,9 +117,25 @@ export default function TodoWidget() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, itemElement) => {
     try {
-      setTodos((prev) => prev.filter((t) => t._id !== id));
+      if (itemElement) {
+        gsap.to(itemElement, {
+          opacity: 0,
+          x: 20,
+          height: 0,
+          marginBottom: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          duration: 0.25,
+          ease: 'power2.in',
+          onComplete: () => {
+            setTodos((prev) => prev.filter((t) => t._id !== id));
+          }
+        });
+      } else {
+        setTodos((prev) => prev.filter((t) => t._id !== id));
+      }
       await deleteTodo(id);
     } catch (err) {
       console.error('Failed to delete todo:', err);
@@ -81,18 +154,21 @@ export default function TodoWidget() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
+          <div className="tilt-depth-lg w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
             <CheckSquare className="w-3.5 h-3.5" />
           </div>
-          <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1.5">
-            <span>To-Do List</span>
-            <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-orange-500/15 text-orange-400">
-              {todos.filter((t) => !t.completed).length}
-            </span>
-          </h3>
+          <div className="tilt-depth-md">
+            <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1.5">
+              <span>To-Do List</span>
+              <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-orange-500/15 text-orange-400">
+                {todos.filter((t) => !t.completed).length}
+              </span>
+            </h3>
+          </div>
         </div>
 
         <button
+          ref={addBtnRef}
           onClick={() => setIsAdding(!isAdding)}
           className="flex items-center gap-1 px-2.5 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-[11px] font-semibold shadow-sm shadow-orange-500/30 active:scale-95 transition-all"
         >
@@ -106,7 +182,10 @@ export default function TodoWidget() {
         {['all', 'active', 'completed'].map((f) => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={(e) => {
+              animateTabSwitch(e.currentTarget);
+              setFilter(f);
+            }}
             className={`flex-1 py-1 rounded-lg font-medium capitalize transition-all ${
               filter === f
                 ? 'bg-zinc-850 text-orange-400 font-bold shadow-sm'
@@ -160,7 +239,7 @@ export default function TodoWidget() {
       )}
 
       {/* Task List with Custom Scrollbar */}
-      <div className="custom-scrollbar flex-1 overflow-y-auto space-y-1 pr-1">
+      <div ref={listRef} className="custom-scrollbar flex-1 overflow-y-auto space-y-1 pr-1 relative">
         {loading ? (
           <div className="flex items-center justify-center h-28 text-xs text-zinc-600">
             Loading tasks...
@@ -171,49 +250,51 @@ export default function TodoWidget() {
             <p className="text-[10px] text-zinc-700 mt-0.5">Click "+ Add" to create one</p>
           </div>
         ) : (
-          filteredTodos.map((todo) => (
-            <div
-              key={todo._id}
-              className={`group flex items-center justify-between p-2 rounded-xl border transition-all ${
-                todo.completed
-                  ? 'bg-zinc-950/40 border-zinc-900 text-zinc-600'
-                  : 'bg-zinc-900/80 border-zinc-850 hover:border-zinc-750 text-zinc-200'
-              }`}
-            >
+          filteredTodos.map((todo) => {
+            return (
               <div
-                onClick={() => handleToggle(todo)}
-                className="flex items-center gap-2 cursor-pointer select-none flex-1 min-w-0"
+                key={todo._id}
+                className={`todo-item-row will-change-transform group relative flex items-center justify-between p-2 rounded-xl border transition-all ${
+                  todo.completed
+                    ? 'bg-zinc-950/40 border-zinc-900 text-zinc-600'
+                    : 'bg-zinc-900/80 border-zinc-850 hover:border-zinc-750 text-zinc-200'
+                }`}
               >
                 <div
-                  className={`w-4 h-4 rounded flex items-center justify-center transition-all ${
-                    todo.completed
-                      ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/40'
-                      : 'border border-zinc-700 hover:border-orange-500 bg-zinc-950'
-                  }`}
+                  onClick={(e) => handleToggle(todo, e)}
+                  className="flex items-center gap-2 cursor-pointer select-none flex-1 min-w-0"
                 >
-                  {todo.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                  <div
+                    className={`checkbox-box w-4 h-4 rounded flex items-center justify-center transition-all ${
+                      todo.completed
+                        ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/40'
+                        : 'border border-zinc-700 hover:border-orange-500 bg-zinc-950'
+                    }`}
+                  >
+                    {todo.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                  </div>
+                  <p className={`text-xs font-medium truncate ${todo.completed ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>
+                    {todo.title}
+                  </p>
                 </div>
-                <p className={`text-xs font-medium truncate ${todo.completed ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>
-                  {todo.title}
-                </p>
-              </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    todo.priority === 'high' ? 'bg-red-500' : todo.priority === 'medium' ? 'bg-orange-500' : 'bg-emerald-500'
-                  }`}
-                />
-                <button
-                  onClick={() => handleDelete(todo._id)}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-500 hover:text-red-400 transition-opacity"
-                  title="Delete"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      todo.priority === 'high' ? 'bg-red-500' : todo.priority === 'medium' ? 'bg-orange-500' : 'bg-emerald-500'
+                    }`}
+                  />
+                  <button
+                    onClick={(e) => handleDelete(todo._id, e.currentTarget.closest('.todo-item-row'))}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-500 hover:text-red-400 transition-opacity"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

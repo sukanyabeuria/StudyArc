@@ -18,7 +18,7 @@ const startServer = async () => {
 
   // Start HTTP Server
   const server = app.listen(PORT, () => {
-    console.log(`\n🚀 FocusNest Backend running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    console.log(`\n🚀 StudyArc Backend running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     console.log(`📡 Health Check URL: http://localhost:${PORT}/api/health\n`);
   });
 

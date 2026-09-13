@@ -17,10 +17,30 @@ app.use(helmet());
 
 // 2. CORS Middleware
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const allowedOrigins = [
+  clientUrl,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
 app.use(
   cors({
-    origin: [clientUrl, 'http://localhost:3000'],
-    credentials: true
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
   })
 );
 
@@ -33,13 +53,18 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
-// 5. Health Check Endpoint
-app.get('/api/health', (req, res) => {
+// 5. Root & Health Check Endpoints
+const handleHealthCheck = (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'FocusNest API is running'
+    message: 'StudyArc API is running',
+    status: 'healthy'
   });
-});
+};
+
+app.get('/', handleHealthCheck);
+app.get('/api', handleHealthCheck);
+app.get('/api/health', handleHealthCheck);
 
 // 6. API Routes
 app.use('/api/users', userRoutes);

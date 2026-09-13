@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { askGeminiAssistant } from '../../api/client';
-import { Bot, Send, User, Loader2, Maximize2, Minimize2, Sparkles } from 'lucide-react';
+import { Bot, Send, User, Loader2, Maximize2, Minimize2 } from 'lucide-react';
+import { animateModalOpen } from '../../animations/microInteractions';
+
+import gsap from 'gsap';
+import { isReducedMotion } from '../../animations/gsapConfig';
+
+const generateMessageId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 export default function AiAssistantWidget() {
   const [messages, setMessages] = useState([
@@ -15,6 +21,14 @@ export default function AiAssistantWidget() {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const fullScreenCardRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (isFullScreen && fullScreenCardRef.current) {
+      animateModalOpen(fullScreenCardRef.current);
+    }
+  }, [isFullScreen]);
 
   const promptChips = [
     'Explain this concept',
@@ -29,6 +43,19 @@ export default function AiAssistantWidget() {
 
   useEffect(() => {
     scrollToBottom();
+
+    // GSAP Smooth Response Appearance for incoming messages
+    if (chatContainerRef.current && !isReducedMotion()) {
+      const allBubbles = chatContainerRef.current.querySelectorAll('.ai-chat-bubble');
+      if (allBubbles.length > 1) {
+        const latestBubble = allBubbles[allBubbles.length - 1];
+        gsap.fromTo(
+          latestBubble,
+          { opacity: 0, y: 12, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power2.out', clearProps: 'transform' }
+        );
+      }
+    }
   }, [messages, loading]);
 
   const handleSend = async (questionText) => {
@@ -36,7 +63,7 @@ export default function AiAssistantWidget() {
     if (!textToSend || loading) return;
 
     const userMessage = {
-      id: String(Date.now()),
+      id: generateMessageId(),
       role: 'user',
       text: textToSend
     };
@@ -51,7 +78,7 @@ export default function AiAssistantWidget() {
         setMessages((prev) => [
           ...prev,
           {
-            id: String(Date.now() + 1),
+            id: generateMessageId(),
             role: 'assistant',
             text: res.data.answer
           }
@@ -61,7 +88,7 @@ export default function AiAssistantWidget() {
       setMessages((prev) => [
         ...prev,
         {
-          id: String(Date.now() + 1),
+          id: generateMessageId(),
           role: 'assistant',
           text: `⚠️ ${err.message || 'Gemini error'}`
         }
@@ -72,14 +99,17 @@ export default function AiAssistantWidget() {
   };
 
   const renderContent = (isModal = false) => (
-    <div className={`flex flex-col justify-between h-full text-zinc-100 ${isModal ? 'max-w-4xl w-full h-[85vh] p-6 bg-[#0b0c0f] border border-zinc-800 rounded-3xl shadow-2xl' : ''}`}>
+    <div
+      ref={isModal ? fullScreenCardRef : null}
+      className={`flex flex-col justify-between h-full text-zinc-100 ${isModal ? 'max-w-4xl w-full h-[85vh] p-6 bg-[#0b0c0f] border border-zinc-800 rounded-3xl shadow-2xl preserve-3d' : ''}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
+          <div className="tilt-depth-lg w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
             <Bot className="w-3.5 h-3.5" />
           </div>
-          <div>
+          <div className="tilt-depth-md">
             <h3 className="text-xs font-bold text-white leading-none flex items-center gap-1.5">
               <span>AI Study Assistant</span>
               <span className="px-1 py-0.2 rounded text-[9px] bg-orange-500/20 text-orange-300 font-semibold border border-orange-500/30">
@@ -105,26 +135,29 @@ export default function AiAssistantWidget() {
       </div>
 
       {/* Messages Scroll Area */}
-      <div className={`custom-scrollbar flex-1 overflow-y-auto space-y-2 pr-1 text-xs mb-2 ${isModal ? 'max-h-[60vh] text-sm space-y-3' : 'min-h-0'}`}>
+      <div
+        ref={isModal ? null : chatContainerRef}
+        className={`custom-scrollbar flex-1 overflow-y-auto space-y-2 pr-1 text-xs mb-2 ${isModal ? 'max-h-[60vh] text-sm space-y-3' : 'min-h-0'}`}
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex items-start gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+            className={`ai-chat-bubble flex items-start gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div
               className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold ${
-                msg.role === 'user' ? 'bg-zinc-800 text-zinc-200' : 'bg-orange-500 text-white shadow-sm'
+                msg.role === 'user' ? 'bg-zinc-800 text-zinc-200' : 'bg-orange-500 text-white shadow-sm shadow-orange-500/30'
               }`}
             >
               {msg.role === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
             </div>
 
             <div
-              className={`p-2.5 rounded-xl max-w-[88%] whitespace-pre-wrap leading-relaxed text-[11px] ${
+              className={`p-2.5 rounded-xl max-w-[88%] whitespace-pre-wrap leading-relaxed text-[11px] transition-all ${
                 isModal ? 'text-xs p-3.5' : ''
               } ${
                 msg.role === 'user'
-                  ? 'bg-orange-500 text-white rounded-tr-none'
+                  ? 'bg-orange-500 text-white rounded-tr-none shadow-md shadow-orange-500/20'
                   : 'bg-zinc-950 border border-zinc-850 text-zinc-200 rounded-tl-none'
               }`}
             >
@@ -134,9 +167,9 @@ export default function AiAssistantWidget() {
         ))}
 
         {loading && (
-          <div className="flex items-center gap-1.5 text-[11px] text-orange-400 pl-7">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            <span>Gemini is thinking...</span>
+          <div className="flex items-center gap-2 text-[11px] text-orange-400 pl-4 py-1 px-3 rounded-lg bg-orange-500/10 border border-orange-500/25 w-fit animate-pulse shadow-sm">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
+            <span className="font-medium">Gemini is formulating an answer...</span>
           </div>
         )}
 
@@ -144,13 +177,13 @@ export default function AiAssistantWidget() {
       </div>
 
       {/* Suggestion Prompt Chips */}
-      <div className="flex items-center gap-1 mb-1.5 overflow-x-auto pb-0.5">
+      <div className="flex items-center gap-1.5 mb-1.5 overflow-x-auto pb-0.5">
         {promptChips.map((chip, idx) => (
           <button
             key={idx}
             type="button"
-            onClick={() => setInput(`${chip}: `)}
-            className="px-2 py-0.5 rounded-md bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 text-[10px] text-zinc-400 hover:text-orange-400 shrink-0 transition-colors"
+            onClick={() => handleSend(chip)}
+            className="px-2.5 py-1 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 text-[10px] font-medium text-zinc-400 hover:text-orange-300 hover:border-orange-500/40 shrink-0 transition-all hover:-translate-y-0.5 hover:shadow-sm hover:shadow-orange-500/10 active:scale-95"
           >
             {chip}
           </button>

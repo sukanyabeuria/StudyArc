@@ -1,11 +1,16 @@
-const BASE_URL = 'http://localhost:5000/api';
+const API_PORT = 5000;
+const host =
+  typeof window !== 'undefined' && window.location.hostname
+    ? window.location.hostname
+    : 'localhost';
+const BASE_URL = import.meta.env.VITE_API_URL || `http://${host}:${API_PORT}/api`;
 
 /**
- * FocusNest API Request Wrapper
+ * StudyArc API Request Wrapper
  * Injects Authorization header and parses standard API response payload
  */
 export async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('focusnest_token');
+  const token = localStorage.getItem('studyarc_token') || localStorage.getItem('focusnest_token');
 
   const headers = {
     'Content-Type': 'application/json',

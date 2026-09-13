@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { BookOpen, Mail, Lock, User, Eye, EyeOff, X, Sparkles } from 'lucide-react';
+import { animateModalOpen, animateModalClose } from '../../animations/microInteractions';
 
 export default function AuthModal() {
   const { authModalOpen, authModalMode, closeAuthModal, openAuthModal, devLogin } = useAuth();
@@ -9,10 +10,26 @@ export default function AuthModal() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+  const modalCardRef = useRef(null);
+  const backdropRef = useRef(null);
+
+  useEffect(() => {
+    if (authModalOpen && modalCardRef.current) {
+      animateModalOpen(modalCardRef.current, backdropRef.current);
+    }
+  }, [authModalOpen]);
 
   if (!authModalOpen) return null;
 
   const isLogin = authModalMode === 'login';
+
+  const handleClose = () => {
+    if (modalCardRef.current) {
+      animateModalClose(modalCardRef.current, backdropRef.current, closeAuthModal);
+    } else {
+      closeAuthModal();
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,16 +39,17 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div ref={backdropRef} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md perspective-1000">
       <div 
-        className="relative w-full max-w-md bg-focus-900/95 border border-zinc-800/80 rounded-2xl p-7 shadow-2xl shadow-orange-950/20 text-zinc-100"
+        ref={modalCardRef}
+        className="relative w-full max-w-md bg-focus-900/95 border border-zinc-800/80 rounded-2xl p-7 shadow-2xl shadow-orange-950/20 text-zinc-100 preserve-3d will-change-transform"
         style={{
           boxShadow: '0 0 40px rgba(249, 115, 22, 0.12), 0 20px 30px -10px rgba(0,0,0,0.8)'
         }}
       >
         {/* Close Button */}
         <button
-          onClick={closeAuthModal}
+          onClick={handleClose}
           className="absolute top-4 right-4 p-1 text-zinc-400 hover:text-zinc-100 rounded-lg hover:bg-zinc-800/60 transition-colors"
         >
           <X className="w-5 h-5" />
@@ -43,7 +61,7 @@ export default function AuthModal() {
             <BookOpen className="w-6 h-6 text-white" />
           </div>
           <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
-            Focus<span className="text-orange-500">Nest</span>
+            Study<span className="text-orange-500">Arc</span>
           </h2>
           <p className="text-xs text-zinc-400 mt-0.5 tracking-wide">Focus · Study · Grow</p>
         </div>

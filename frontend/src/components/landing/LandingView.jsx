@@ -343,7 +343,8 @@ export default function LandingView() {
       speed: '0.85',
       badge: 'Interactive Room',
       tag: '01',
-      desc: 'A calming sunset retreat with live study mates, ambient lo-fi player, and personalized motivation quotes.'
+      desc: 'A calming sunset retreat with live study mates, ambient lo-fi player, and personalized motivation quotes.',
+      image: '/virtual-sanctuary.jpg'
     },
     {
       id: 'workspace',
@@ -352,7 +353,8 @@ export default function LandingView() {
       speed: '1.25',
       badge: 'Zero Clutter',
       tag: '02',
-      desc: 'Pomodoro timer, To-Do manager, LoFi audio console, Gemini AI assistant, and Leaderboard all in one screen.'
+      desc: 'Pomodoro timer, To-Do manager, LoFi audio console, Gemini AI assistant, and Leaderboard all in one screen.',
+      image: '/mission-workspace.png'
     },
     {
       id: 'gemini',
@@ -361,7 +363,8 @@ export default function LandingView() {
       speed: '0.9',
       badge: 'AI Powered',
       tag: '03',
-      desc: 'Break down complex algorithms, debug tricky code snippets, or get intuitive concept analogies in seconds.'
+      desc: 'Break down complex algorithms, debug tricky code snippets, or get intuitive concept analogies in seconds.',
+      image: '/lofi-bg.jpg'
     },
     {
       id: 'leaderboard',
@@ -370,7 +373,8 @@ export default function LandingView() {
       speed: '1.15',
       badge: 'Live Rankings',
       tag: '04',
-      desc: 'Celebrate consistency with tier badges, weekly standings, and leveling celebrations with confetti fanfare.'
+      desc: 'Celebrate consistency with tier badges, weekly standings, and leveling celebrations with confetti fanfare.',
+      image: '/prestige-guild.png'
     }
   ];
 
@@ -420,9 +424,9 @@ export default function LandingView() {
           }}
         >
           <img
-            src="/lofi-bg.jpg"
-            alt="FocusNest Study Sanctuary"
-            className="w-full h-full object-cover object-center brightness-90 filter contrast-105"
+            src="/hero-brain.jpg"
+            alt="StudyArc Neural Focus Brain"
+            className="w-full h-full object-cover object-center brightness-95 filter contrast-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
         </div>
@@ -524,9 +528,9 @@ export default function LandingView() {
             {/* Left Parallax Image */}
             <div className="about__img w-full lg:w-1/2 h-[450px] sm:h-[600px] rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl shadow-orange-950/20 relative">
               <img
-                src="/lofi-bg.jpg"
-                alt="Cozy Study Room View"
-                className="w-full h-full object-cover object-left-bottom"
+                src="/sanctuary-experience.jpg"
+                alt="Tranquil Sunset Study Loft"
+                className="w-full h-full object-cover object-center"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20" />
               <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-black/70 backdrop-blur-md border border-zinc-800">
@@ -671,12 +675,11 @@ export default function LandingView() {
                 {/* Inner Image Container with Parallax Zoom */}
                 <div className="work__item-img w-full h-[360px] sm:h-[440px] overflow-hidden relative">
                   <img
-                    src="/lofi-bg.jpg"
+                    src={item.image || '/lofi-bg.jpg'}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-75"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-80"
                     style={{
-                      objectPosition:
-                        idx === 0 ? 'top left' : idx === 1 ? 'bottom right' : idx === 2 ? 'top right' : 'bottom left'
+                      objectPosition: 'center'
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />

@@ -3,7 +3,16 @@ const host =
   typeof window !== 'undefined' && window.location.hostname
     ? window.location.hostname
     : 'localhost';
-const BASE_URL = import.meta.env.VITE_API_URL || `http://${host}:${API_PORT}/api`;
+
+const rawApiUrl = import.meta.env.VITE_API_URL;
+let resolvedBaseUrl;
+if (rawApiUrl && rawApiUrl.trim()) {
+  const trimmed = rawApiUrl.trim().replace(/\/+$/, '');
+  resolvedBaseUrl = trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+} else {
+  resolvedBaseUrl = `http://${host}:${API_PORT}/api`;
+}
+const BASE_URL = resolvedBaseUrl;
 
 /**
  * StudyArc API Request Wrapper

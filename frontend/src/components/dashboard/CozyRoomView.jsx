@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -14,6 +14,7 @@ import ThreeCozyOrb from '../three/ThreeCozyOrb';
 
 export default function CozyRoomView() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const containerRef = useRef(null);
 
   useDashboardParallax(containerRef);
@@ -155,25 +156,31 @@ export default function CozyRoomView() {
               <NavLink
                 key={card.id}
                 to="/workspace"
-                className="room-card block preserve-3d will-change-transform group p-4 rounded-2xl bg-[#0c0d11] hover:bg-[#12141a] border border-zinc-850 hover:border-orange-500/40 text-left transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/15 active:scale-[0.98]"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/workspace');
+                }}
+                className="room-card block cursor-pointer select-none preserve-3d will-change-transform group p-4 rounded-2xl bg-[#0c0d11] hover:bg-[#12141a] border border-zinc-850 hover:border-orange-500/40 text-left transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/15 active:scale-[0.98]"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="tilt-depth-lg w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all text-orange-400">
-                    <Icon className="w-4 h-4" />
+                <div className="pointer-events-none">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="tilt-depth-lg w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all text-orange-400">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-semibold text-zinc-500 uppercase px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+                      {card.badge}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
-                    {card.badge}
-                  </span>
-                </div>
 
-                <div className="tilt-depth-md">
-                  <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-400 transition-colors mb-0.5">
-                    {card.title}
-                  </h3>
+                  <div className="tilt-depth-md">
+                    <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-400 transition-colors mb-0.5">
+                      {card.title}
+                    </h3>
 
-                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                    <span className="truncate">{card.description}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                      <span className="truncate">{card.description}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                    </div>
                   </div>
                 </div>
               </NavLink>

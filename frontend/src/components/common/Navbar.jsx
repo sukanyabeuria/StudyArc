@@ -1,10 +1,23 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { BookOpen, Flame, User, LogOut, Sparkles } from 'lucide-react';
+import { Sparkles, Flame, User, LogOut, Lock } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isAuthenticated, openAuthModal, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleProtectedNav = (e) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      openAuthModal('signup');
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="h-14 shrink-0 px-5 flex items-center justify-between border-b border-zinc-800/80 bg-black z-30 select-none">
@@ -13,11 +26,11 @@ export default function Navbar() {
         to="/"
         className="flex items-center gap-2.5 group cursor-pointer"
       >
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-md shadow-orange-600/30 group-hover:shadow-orange-500/50 transition-all">
-          <BookOpen className="w-4 h-4 text-white" />
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-400 flex items-center justify-center shadow-md shadow-orange-500/30 group-hover:shadow-orange-500/50 group-hover:scale-105 transition-all">
+          <Sparkles className="w-4 h-4 text-white" />
         </div>
-        <span className="text-base font-bold tracking-tight text-white flex items-center gap-1">
-          Focus<span className="text-orange-500">Nest</span>
+        <span className="text-base font-black font-syne tracking-tight text-white flex items-center">
+          Study<span className="text-orange-500">Arc</span>
         </span>
       </NavLink>
 
@@ -38,54 +51,62 @@ export default function Navbar() {
 
         <NavLink
           to="/room"
+          onClick={handleProtectedNav}
           className={({ isActive }) =>
-            `px-3 py-1.5 rounded-lg transition-colors ${
+            `px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               isActive
                 ? 'text-orange-400 bg-orange-500/10 font-bold'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
             }`
           }
         >
-          Study Room
+          <span>Study Room</span>
+          {!isAuthenticated && <Lock className="w-3 h-3 text-zinc-500" />}
         </NavLink>
 
         <NavLink
           to="/workspace"
+          onClick={handleProtectedNav}
           className={({ isActive }) =>
-            `px-3 py-1.5 rounded-lg transition-colors ${
+            `px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               isActive
                 ? 'text-orange-400 bg-orange-500/10 font-bold'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
             }`
           }
         >
-          Workspace
+          <span>Workspace</span>
+          {!isAuthenticated && <Lock className="w-3 h-3 text-zinc-500" />}
         </NavLink>
 
         <NavLink
           to="/leaderboard"
+          onClick={handleProtectedNav}
           className={({ isActive }) =>
-            `px-3 py-1.5 rounded-lg transition-colors ${
+            `px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               isActive
                 ? 'text-orange-400 bg-orange-500/10 font-bold'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
             }`
           }
         >
-          Leaderboard
+          <span>Leaderboard</span>
+          {!isAuthenticated && <Lock className="w-3 h-3 text-zinc-500" />}
         </NavLink>
 
         <NavLink
           to="/about"
+          onClick={handleProtectedNav}
           className={({ isActive }) =>
-            `px-3 py-1.5 rounded-lg transition-colors ${
+            `px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
               isActive
                 ? 'text-orange-400 bg-orange-500/10 font-bold'
                 : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
             }`
           }
         >
-          About
+          <span>About</span>
+          {!isAuthenticated && <Lock className="w-3 h-3 text-zinc-500" />}
         </NavLink>
       </div>
 
@@ -115,7 +136,7 @@ export default function Navbar() {
 
             {/* Log Out */}
             <button
-              onClick={logout}
+              onClick={handleLogout}
               title="Log out"
               className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded-lg transition-colors"
             >

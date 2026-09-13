@@ -1,12 +1,11 @@
-# Dependencies
-node_modules/
+# Root .gitignore for FocusNest
 
 # Environment variables & secrets (CRITICAL: Never commit .env files)
 .env
 .env.*
 !.env.example
 
-# Firebase and Cloud credentials
+# Credentials, keys, and certificates
 *firebase*key*.json
 *serviceAccountKey*.json
 firebase-service-account*.json
@@ -15,14 +14,21 @@ firebase-service-account*.json
 *.p12
 *.cert
 
+# Node dependencies & build artifacts
+node_modules/
+dist/
+dist-ssr/
+build/
+
 # Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-logs/
-*.log
+pnpm-debug.log*
 
-# OS / Editor files
+# OS & Editor files
 .DS_Store
 Thumbs.db
 .vscode/

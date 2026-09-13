@@ -4,20 +4,114 @@
 
 @layer base {
   html, body {
-    height: 100%;
     margin: 0;
     padding: 0;
     background-color: #000000;
     color: #f4f4f5;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
   #root {
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
   }
+}
+
+/* Dmitri Naumov Parallax & Brutalist Typography Utilities */
+.font-syne {
+  font-family: 'Syne', sans-serif;
+}
+
+.stroke {
+  color: transparent;
+  -webkit-text-stroke: 1.5px currentColor;
+}
+
+.stroke-white {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.85);
+}
+
+.stroke-orange {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #f97316;
+}
+
+.char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.title_paralax {
+  display: inline-block;
+  will-change: transform;
+}
+
+.section-title__square {
+  position: absolute;
+  display: inline-block;
+  width: 130px;
+  height: 130px;
+  border: 1.5px solid rgba(249, 115, 22, 0.35);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Dmitri Naumov Header Marquee */
+.header__marq {
+  width: 100%;
+  background: #090a0d;
+  border-top: 1px solid #27272a;
+  border-bottom: 1px solid #27272a;
+  overflow: hidden;
+}
+
+.header__marq-wrapp {
+  display: flex;
+  white-space: nowrap;
+  width: max-content;
+  padding: 12px 0;
+  will-change: transform;
+}
+
+.header__marq-txt {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 32px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  letter-spacing: 0.15em;
+  color: #a1a1aa;
+}
+
+.header__marq-star {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  color: #f97316;
+}
+
+/* Service / Feature item hover & arrow */
+.serv__item-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  color: #f97316;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 /* Styled Scrollbars */

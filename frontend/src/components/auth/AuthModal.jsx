@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { BookOpen, Mail, Lock, User, Eye, EyeOff, X, Sparkles } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, X, Sparkles } from 'lucide-react';
 
 export default function AuthModal() {
   const { authModalOpen, authModalMode, closeAuthModal, openAuthModal, devLogin } = useAuth();
@@ -39,13 +39,13 @@ export default function AuthModal() {
 
         {/* Logo & Brand Header */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/30 mb-2">
-            <BookOpen className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-400 flex items-center justify-center shadow-lg shadow-orange-600/30 mb-2">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
-            Focus<span className="text-orange-500">Nest</span>
+          <h2 className="text-xl font-black font-syne tracking-tight text-white flex items-center">
+            Study<span className="text-orange-500">Arc</span>
           </h2>
-          <p className="text-xs text-zinc-400 mt-0.5 tracking-wide">Focus · Study · Grow</p>
+          <p className="text-xs text-zinc-400 mt-0.5 tracking-wide font-sans">Focus · Study · Grow</p>
         </div>
 
         {/* Header Title */}

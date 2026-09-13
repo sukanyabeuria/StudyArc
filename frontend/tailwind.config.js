@@ -29,7 +29,8 @@ export default {
         'glow-lg': '0 0 40px rgba(249, 115, 22, 0.45)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        syne: ['Syne', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
       }
     },
   },

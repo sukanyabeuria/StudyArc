@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:5000/api';
+// Support VITE_API_URL with or without trailing slash or /api suffix
+const rawUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
+const BASE_URL = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl}/api`;
 
 /**
  * FocusNest API Request Wrapper

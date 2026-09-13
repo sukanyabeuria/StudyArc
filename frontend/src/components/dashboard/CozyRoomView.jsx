@@ -64,7 +64,7 @@ export default function CozyRoomView() {
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs text-zinc-400 font-medium">Virtual Study Sanctuary</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold font-syne text-white tracking-tight">
             {greetingTime}, {user?.name || 'Debasis'} <span className="inline-block">👋</span>
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1">

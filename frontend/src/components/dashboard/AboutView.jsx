@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Flame, Trophy, Bot, Music } from 'lucide-react';
+import { Sparkles, Flame, Trophy, Bot, Music } from 'lucide-react';
 
 export default function AboutView() {
   const navigate = useNavigate();
@@ -10,12 +10,12 @@ export default function AboutView() {
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-md shadow-orange-600/30 text-white">
-            <BookOpen className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-400 flex items-center justify-center shadow-md shadow-orange-600/30 text-white">
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
-              About Focus<span className="text-orange-500">Nest</span>
+            <h1 className="text-xl sm:text-2xl font-bold font-syne text-white">
+              About Study<span className="text-orange-500">Arc</span>
             </h1>
             <p className="text-xs text-zinc-400">
               A gamified virtual study sanctuary built for lifelong learners.
@@ -29,7 +29,7 @@ export default function AboutView() {
             <span>✨ The Vision</span>
           </h2>
           <p className="text-xs text-zinc-400 leading-relaxed">
-            FocusNest turns daily studying into an encouraging, aesthetic habit. By combining the proven **Pomodoro Technique**, soothing **LoFi beats**, **XP leveling tiers**, and AI assistance from **Google Gemini**, FocusNest helps you turn small daily sessions into massive personal growth.
+            StudyArc turns daily studying into an encouraging, aesthetic habit. By combining the proven **Pomodoro Technique**, soothing **LoFi beats**, **XP leveling tiers**, and AI assistance from **Google Gemini**, StudyArc helps you turn small daily sessions into massive personal growth.
           </p>
         </div>
 
@@ -51,7 +51,7 @@ export default function AboutView() {
               <span>XP & Level Progression</span>
             </div>
             <p className="text-[11px] text-zinc-500 leading-relaxed">
-              1 study minute = 1 XP. Progress through level thresholds and compare your consistency on the global FocusNest leaderboard.
+              1 study minute = 1 XP. Progress through level thresholds and compare your consistency on the global StudyArc leaderboard.
             </p>
           </div>
 

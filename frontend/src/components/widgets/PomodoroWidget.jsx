@@ -103,25 +103,27 @@ export default function PomodoroWidget({ onSessionComplete }) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const timeFormatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  const strokeProgress = (timeLeft / totalDuration) * 283;
 
   return (
-    <div className="bg-[#0b0c0f] border border-zinc-850 rounded-2xl p-3.5 shadow-xl flex flex-col justify-between h-full overflow-hidden text-zinc-100">
+    <div className="bg-gradient-to-b from-[#0c0e15] to-[#08090d] border border-zinc-800/80 hover:border-zinc-700/80 rounded-2xl p-4 shadow-2xl flex flex-col justify-between h-full overflow-hidden text-zinc-100 relative">
+      {/* Subtle Inner Highlight */}
+      <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent pointer-events-none" />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-orange-500/15 text-orange-400 flex items-center justify-center">
-            <Trophy className="w-3.5 h-3.5" />
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-400 flex items-center justify-center shadow-sm shadow-orange-500/10">
+            <Trophy className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white leading-none">Pomodoro</h3>
-            <span className="text-[10px] text-zinc-500 font-medium">Focus Interval</span>
+            <h3 className="text-xs font-bold text-white font-syne leading-none">Pomodoro Flow</h3>
+            <span className="text-[10px] text-zinc-400 font-medium">Deep Focus Interval</span>
           </div>
         </div>
 
         <button 
           onClick={resetTimer}
-          className="p-1 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-850 transition-colors"
+          className="p-1.5 rounded-xl text-zinc-400 hover:text-orange-400 hover:bg-zinc-850/80 transition-colors"
           title="Reset timer"
         >
           <Settings className="w-3.5 h-3.5" />
@@ -129,15 +131,15 @@ export default function PomodoroWidget({ onSessionComplete }) {
       </div>
 
       {/* Mode Switcher Tabs */}
-      <div className="flex items-center gap-1 p-1 bg-zinc-950 rounded-xl mb-2 border border-zinc-850 text-[11px]">
+      <div className="flex items-center gap-1 p-1 bg-zinc-950/90 rounded-xl mb-2 border border-zinc-850 text-[11px]">
         {['pomodoro', 'short_break', 'long_break'].map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
             className={`flex-1 py-1 rounded-lg font-medium capitalize transition-all ${
               mode === m
-                ? 'bg-orange-500 text-white font-bold shadow-sm shadow-orange-500/20'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold shadow-md shadow-orange-500/25'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
             }`}
           >
             {m.replace('_', ' ')}
@@ -145,40 +147,46 @@ export default function PomodoroWidget({ onSessionComplete }) {
         ))}
       </div>
 
-      {/* Circular Progress Timer (Compact to fit one screen) */}
+      {/* Circular Progress Timer */}
       <div className="relative flex flex-col items-center justify-center my-auto select-none py-1">
+        {/* Ambient Radial Glow */}
+        <div className="absolute w-28 h-28 rounded-full bg-orange-500/10 blur-xl pointer-events-none" />
+
         <div className="relative w-36 h-36 flex items-center justify-center">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
             <circle
               cx="50"
               cy="50"
-              r="45"
+              r="44"
               fill="none"
-              stroke="#1a1c23"
+              stroke="#181a22"
               strokeWidth="5"
             />
             <circle
               cx="50"
               cy="50"
-              r="45"
+              r="44"
               fill="none"
               stroke="#f97316"
               strokeWidth="5"
-              strokeDasharray="283"
-              strokeDashoffset={283 - strokeProgress}
+              strokeDasharray="276"
+              strokeDashoffset={276 - (timeLeft / totalDuration) * 276}
               strokeLinecap="round"
-              className="transition-all duration-1000 ease-linear drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+              className="transition-all duration-1000 ease-linear drop-shadow-[0_0_12px_rgba(249,115,22,0.45)]"
             />
           </svg>
 
           {/* Time text inside ring */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="text-2xl font-black tracking-tight text-white font-mono">
+            <span className="text-3xl font-black tracking-tight text-white font-syne">
               {timeFormatted}
             </span>
-            <span className="text-[9px] font-semibold text-orange-400 uppercase tracking-wider mt-0.5">
-              {isRunning ? 'Focusing' : 'Paused'}
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-[9px] font-bold tracking-wider uppercase mt-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-emerald-400 animate-pulse' : 'bg-orange-500'}`} />
+              <span className={isRunning ? 'text-emerald-400' : 'text-zinc-400'}>
+                {isRunning ? 'Focusing' : 'Paused'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -187,15 +195,15 @@ export default function PomodoroWidget({ onSessionComplete }) {
       <div className="flex items-center justify-center gap-2.5 my-1.5">
         <button
           onClick={toggleTimer}
-          className="flex-1 max-w-[130px] py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+          className="flex-1 max-w-[140px] py-2 px-5 bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           {isRunning ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-          <span>{isRunning ? 'Pause' : 'Start'}</span>
+          <span>{isRunning ? 'Pause' : 'Start Focus'}</span>
         </button>
 
         <button
           onClick={resetTimer}
-          className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition-colors"
+          className="p-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 border border-zinc-800/90 transition-all active:scale-95"
           title="Reset"
         >
           <RotateCcw className="w-3.5 h-3.5" />
@@ -203,14 +211,16 @@ export default function PomodoroWidget({ onSessionComplete }) {
       </div>
 
       {/* Footer Stats */}
-      <div className="flex items-center justify-between pt-2 border-t border-zinc-850 text-[11px] text-zinc-400">
-        <div className="flex items-center gap-1">
-          <span>Sessions Today:</span>
-          <span className="font-bold text-zinc-200">{sessionsCompletedToday}</span>
+      <div className="flex items-center justify-between pt-2.5 border-t border-zinc-850/80 text-[11px] text-zinc-400">
+        <div className="flex items-center gap-1.5">
+          <span className="text-zinc-400">Completed Today:</span>
+          <span className="font-bold text-zinc-100 px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800">
+            {sessionsCompletedToday}
+          </span>
         </div>
 
-        <div className="flex items-center gap-1 text-orange-400 font-semibold">
-          <span>Keep going!</span>
+        <div className="flex items-center gap-1 text-orange-400 font-bold">
+          <span>Keep going</span>
           <Flame className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
         </div>
       </div>

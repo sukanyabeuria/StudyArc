@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 let aiClient = null;
 
 const getAiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : null;
   if (!apiKey) {
     return null;
   }

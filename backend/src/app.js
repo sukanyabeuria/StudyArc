@@ -16,10 +16,24 @@ const app = express();
 app.use(helmet());
 
 // 2. CORS Middleware
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const configuredOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim()).filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+const allowedOrigins = Array.from(
+  new Set([...configuredOrigins, 'http://localhost:5173', 'http://localhost:3000'])
+);
+
 app.use(
   cors({
-    origin: [clientUrl, 'http://localhost:3000'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true
   })
 );

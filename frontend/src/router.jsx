@@ -6,6 +6,7 @@ import CozyRoomView from './components/dashboard/CozyRoomView';
 import WorkspaceGrid from './components/dashboard/WorkspaceGrid';
 import LeaderboardPage from './pages/LeaderboardPage';
 import AboutView from './components/dashboard/AboutView';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -18,19 +19,35 @@ export const router = createBrowserRouter([
       },
       {
         path: 'room',
-        element: <CozyRoomView />
+        element: (
+          <ProtectedRoute>
+            <CozyRoomView />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'workspace',
-        element: <WorkspaceGrid />
+        element: (
+          <ProtectedRoute>
+            <WorkspaceGrid />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'leaderboard',
-        element: <LeaderboardPage />
+        element: (
+          <ProtectedRoute>
+            <LeaderboardPage />
+          </ProtectedRoute>
+        )
       },
       {
         path: 'about',
-        element: <AboutView />
+        element: (
+          <ProtectedRoute>
+            <AboutView />
+          </ProtectedRoute>
+        )
       },
       {
         path: '*',

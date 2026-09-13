@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/dashboard/Sidebar';
 import AuthModal from '../components/auth/AuthModal';
 import Toast from '../components/common/Toast';
 
+import PageTransition from '../components/common/PageTransition';
+
 export default function RootLayout() {
-  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [toast, setToast] = useState(null);
 
@@ -27,7 +27,7 @@ export default function RootLayout() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-black text-zinc-100 flex flex-col select-none">
+    <div className={`w-full bg-black text-zinc-100 flex flex-col select-none ${isLandingPage ? 'min-h-screen overflow-x-hidden' : 'h-screen overflow-hidden'}`}>
       {/* Toast Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
@@ -37,16 +37,18 @@ export default function RootLayout() {
       {/* Top Navbar */}
       <Navbar />
 
-      {/* Main Single-Screen Content Area */}
-      <div className="h-[calc(100vh-3.5rem)] w-full flex overflow-hidden bg-black">
+      {/* Main Content Area */}
+      <div className={`w-full flex bg-black ${isLandingPage ? 'flex-1 overflow-visible' : 'h-[calc(100vh-3.5rem)] overflow-hidden'}`}>
         {/* Show Sidebar on inner application pages */}
         {!isLandingPage && (
           <Sidebar />
         )}
 
-        {/* View Content (Outlet) */}
-        <main className="flex-1 h-full overflow-hidden bg-black flex flex-col">
-          <Outlet context={{ onSessionComplete: handleSessionComplete }} />
+        {/* View Content (Outlet) with PageTransition */}
+        <main className={`flex-1 bg-black flex flex-col ${isLandingPage ? 'min-h-full overflow-visible' : 'h-full overflow-hidden'}`}>
+          <PageTransition>
+            <Outlet context={{ onSessionComplete: handleSessionComplete }} />
+          </PageTransition>
         </main>
       </div>
     </div>

@@ -5,7 +5,9 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('focusnest_token') || '');
+  const [token, setToken] = useState(
+    localStorage.getItem('studyarc_token') || localStorage.getItem('focusnest_token') || ''
+  );
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login'); // 'login' | 'signup'
@@ -26,6 +28,7 @@ export function AuthProvider({ children }) {
         }
       } catch (err) {
         console.warn('Auth token invalid or expired:', err.message);
+        localStorage.removeItem('studyarc_token');
         localStorage.removeItem('focusnest_token');
         setToken('');
         setUser(null);
@@ -38,7 +41,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const loginWithToken = (newToken) => {
-    localStorage.setItem('focusnest_token', newToken);
+    localStorage.setItem('studyarc_token', newToken);
     setToken(newToken);
     setAuthModalOpen(false);
   };
@@ -50,6 +53,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    localStorage.removeItem('studyarc_token');
     localStorage.removeItem('focusnest_token');
     setToken('');
     setUser(null);
@@ -76,6 +80,19 @@ export function AuthProvider({ children }) {
     setAuthModalOpen(false);
   };
 
+  const awardXp = (amount = 15) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const newXp = (prev.xp || 0) + amount;
+      const newLevel = Math.floor(newXp / 250) + 1;
+      return {
+        ...prev,
+        xp: newXp,
+        level: newLevel
+      };
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -91,6 +108,7 @@ export function AuthProvider({ children }) {
         devLogin,
         logout,
         refreshUser,
+        awardXp,
         updateProfile: updateMyProfile
       }}
     >
@@ -99,6 +117,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components, react/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

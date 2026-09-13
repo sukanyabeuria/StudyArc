@@ -18,16 +18,21 @@ export const askAssistant = async (req, res, next) => {
 
     const trimmedQuestion = question.trim();
 
-    if (trimmedQuestion.length > 1000) {
+    if (trimmedQuestion.length > 2000) {
       return res.status(400).json({
         success: false,
-        message: 'Question cannot exceed 1000 characters'
+        message: 'Question cannot exceed 2000 characters'
       });
     }
 
+    const userLabel = req.user?.name ? `${req.user.name}` : 'Study Learner (Guest)';
+    console.log(`[AI Assistant] Received question from ${userLabel}: "${trimmedQuestion.substring(0, 70)}..."`);
+
     const answer = await askGemini(trimmedQuestion);
 
-    res.status(200).json({
+    console.log(`[AI Assistant] Successfully generated response (${answer ? answer.length : 0} characters)`);
+
+    return res.status(200).json({
       success: true,
       data: {
         question: trimmedQuestion,
@@ -35,6 +40,10 @@ export const askAssistant = async (req, res, next) => {
       }
     });
   } catch (error) {
-    next(error);
+    console.error(`[AI Assistant Controller Error]:`, error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate answer from AI Assistant'
+    });
   }
 };

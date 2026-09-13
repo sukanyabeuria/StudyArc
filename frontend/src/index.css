@@ -192,3 +192,78 @@
 .glow-orange-lg {
   box-shadow: 0 0 35px rgba(249, 115, 22, 0.35);
 }
+
+/* 3D Depth Utilities for Cards, Widgets and Interactive Elements */
+.perspective-800 {
+  perspective: 800px;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.will-change-transform {
+  will-change: transform, opacity;
+}
+
+/* 3D Depth Tiers (Background -20px, Card 0px, Content 15px, Icons 25px) */
+.depth-bg {
+  transform: translateZ(-20px);
+}
+
+.depth-card {
+  transform: translateZ(0px);
+}
+
+.depth-content, .tilt-depth-md {
+  transform: translateZ(15px);
+}
+
+.depth-icon, .tilt-depth-lg {
+  transform: translateZ(25px);
+}
+
+/* DmitriNaumov GSAP Parallax Styles */
+.stroke-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(249, 115, 22, 0.7);
+}
+
+.stroke-text-white {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.75);
+}
+
+.stroke-text-zinc {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(113, 113, 122, 0.85);
+}
+
+.parallax-square {
+  position: absolute;
+  display: inline-block;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

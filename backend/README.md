@@ -1,6 +1,6 @@
-# 🦉 FocusNest Backend
+# 🦉 StudyArc Backend
 
-FocusNest is a gamified "Study Together" web application designed for students and learners. It combines a Pomodoro timer, personal todo lists, study streaks, an XP and leveling progression system, leaderboards, and an AI study assistant powered by Google Gemini.
+StudyArc is a gamified "Study Together" web application designed for students and learners. It combines a Pomodoro timer, personal todo lists, study streaks, an XP and leveling progression system, leaderboards, and an AI study assistant powered by Google Gemini.
 
 ---
 

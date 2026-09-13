@@ -1,13 +1,28 @@
-// Support VITE_API_URL with or without trailing slash or /api suffix
-const rawUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
-const BASE_URL = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl}/api`;
+const API_PORT = 5000;
+const host =
+  typeof window !== 'undefined' && window.location.hostname
+    ? window.location.hostname
+    : 'localhost';
+
+const rawApiUrl = import.meta.env.VITE_API_URL;
+let resolvedBaseUrl;
+if (rawApiUrl && rawApiUrl.trim()) {
+  const trimmed = rawApiUrl.trim().replace(/\/+$/, '');
+  resolvedBaseUrl = trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+} else if (host === 'localhost' || host === '127.0.0.1') {
+  resolvedBaseUrl = `http://${host}:${API_PORT}/api`;
+} else {
+  // Production default Render backend endpoint for Vercel deployment
+  resolvedBaseUrl = 'https://studyarc-backend.onrender.com/api';
+}
+const BASE_URL = resolvedBaseUrl;
 
 /**
- * FocusNest API Request Wrapper
+ * StudyArc API Request Wrapper
  * Injects Authorization header and parses standard API response payload
  */
 export async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('focusnest_token');
+  const token = localStorage.getItem('studyarc_token') || localStorage.getItem('focusnest_token');
 
   const headers = {
     'Content-Type': 'application/json',

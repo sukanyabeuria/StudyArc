@@ -7,6 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        zinc: {
+          750: '#232936',
+          850: '#141820'
+        },
         focus: {
           950: '#0a0c10',
           900: '#0f1218',

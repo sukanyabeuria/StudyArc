@@ -37,6 +37,9 @@ export const initFirebase = () => {
         })
       });
       console.log(`[Firebase Admin] Initialized with environment credentials for project: ${projectId}`);
+    } else if (projectId) {
+      firebaseApp = admin.initializeApp({ projectId });
+      console.log(`[Firebase Admin] Initialized with project ID: ${projectId}`);
     } else {
       console.warn(
         `[Firebase Admin Warning] No Firebase credentials provided in .env. ` +

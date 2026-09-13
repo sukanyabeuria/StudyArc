@@ -53,6 +53,26 @@ export const protect = async (req, res, next) => {
       if (admin.apps.length) {
         const auth = getAuth();
         decodedToken = await auth.verifyIdToken(token);
+      } else if (token.includes('.') && allowDevAuth) {
+        try {
+          const payloadBase64 = token.split('.')[1];
+          const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf8');
+          const payload = JSON.parse(payloadJson);
+          decodedToken = {
+            uid: payload.user_id || payload.sub || payload.uid || 'dev_user',
+            email: payload.email || 'user@studyarc.com',
+            name: payload.name || payload.email?.split('@')[0] || 'Focus Learner',
+            picture: payload.picture || ''
+          };
+          console.log(`[Auth] Parsed client Firebase token for UID: ${decodedToken.uid}`);
+        } catch (e) {
+          decodedToken = {
+            uid: 'dev_debasis',
+            email: 'debasis@studyarc.com',
+            name: 'Debasis',
+            picture: ''
+          };
+        }
       } else if (allowDevAuth) {
         // Graceful fallback to dev persona if Firebase admin is not configured
         decodedToken = {
@@ -145,6 +165,25 @@ export const optionalProtect = async (req, res, next) => {
     } else if (admin.apps.length) {
       const auth = getAuth();
       decodedToken = await auth.verifyIdToken(token);
+    } else if (token.includes('.') && allowDevAuth) {
+      try {
+        const payloadBase64 = token.split('.')[1];
+        const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf8');
+        const payload = JSON.parse(payloadJson);
+        decodedToken = {
+          uid: payload.user_id || payload.sub || payload.uid || 'dev_user',
+          email: payload.email || 'user@studyarc.com',
+          name: payload.name || payload.email?.split('@')[0] || 'Focus Learner',
+          picture: payload.picture || ''
+        };
+      } catch (e) {
+        decodedToken = {
+          uid: 'dev_debasis',
+          email: 'debasis@studyarc.com',
+          name: 'Debasis',
+          picture: ''
+        };
+      }
     } else if (allowDevAuth) {
       decodedToken = {
         uid: 'dev_debasis',

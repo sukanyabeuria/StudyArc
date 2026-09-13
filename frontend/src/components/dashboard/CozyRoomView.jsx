@@ -62,7 +62,8 @@ export default function CozyRoomView() {
       description: 'Plan and check off tasks',
       icon: CheckSquare,
       color: 'text-orange-400',
-      badge: 'Tasks'
+      badge: 'Tasks',
+      path: '/todo'
     },
     {
       id: 'pomodoro',
@@ -70,7 +71,8 @@ export default function CozyRoomView() {
       description: '25m intervals for deep focus',
       icon: Clock,
       color: 'text-amber-400',
-      badge: 'Timer'
+      badge: 'Timer',
+      path: '/pomodoro'
     },
     {
       id: 'music',
@@ -78,7 +80,8 @@ export default function CozyRoomView() {
       description: 'LoFi radio & soundscapes',
       icon: Music,
       color: 'text-orange-500',
-      badge: 'Audio'
+      badge: 'Audio',
+      path: '/music'
     },
     {
       id: 'ai',
@@ -86,7 +89,8 @@ export default function CozyRoomView() {
       description: 'Instant help with Gemini',
       icon: Bot,
       color: 'text-amber-300',
-      badge: 'AI Tutor'
+      badge: 'AI Tutor',
+      path: '/ai'
     },
   ];
 
@@ -151,7 +155,7 @@ export default function CozyRoomView() {
             return (
               <button
                 key={card.id}
-                onClick={() => navigate('/workspace')}
+                onClick={() => navigate(card.path || '/workspace')}
                 className="room-card preserve-3d will-change-transform group p-4 rounded-2xl bg-[#0c0d11] hover:bg-[#12141a] border border-zinc-850 hover:border-orange-500/40 text-left transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/15 active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between mb-3">

@@ -17,11 +17,43 @@ export const router = createBrowserRouter([
         element: <LandingView />
       },
       {
+        path: 'login',
+        element: <LandingView autoAuth="login" />
+      },
+      {
+        path: 'signup',
+        element: <LandingView autoAuth="signup" />
+      },
+      {
         path: 'room',
         element: <CozyRoomView />
       },
       {
+        path: 'dashboard',
+        element: <CozyRoomView />
+      },
+      {
+        path: 'study-room',
+        element: <CozyRoomView />
+      },
+      {
         path: 'workspace',
+        element: <WorkspaceGrid />
+      },
+      {
+        path: 'todo',
+        element: <WorkspaceGrid />
+      },
+      {
+        path: 'pomodoro',
+        element: <WorkspaceGrid />
+      },
+      {
+        path: 'music',
+        element: <WorkspaceGrid />
+      },
+      {
+        path: 'ai',
         element: <WorkspaceGrid />
       },
       {

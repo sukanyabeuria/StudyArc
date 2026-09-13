@@ -20,7 +20,7 @@ import { useMagneticButton } from '../../animations/microInteractions';
 import { useDmitriParallax } from '../../animations/scrollAnimations';
 import ThreeHeroCrystal from '../three/ThreeHeroCrystal';
 
-export default function LandingView() {
+export default function LandingView({ autoAuth }) {
   const { isAuthenticated, openAuthModal } = useAuth();
   const navigate = useNavigate();
   const containerRef = useRef(null);
@@ -31,6 +31,12 @@ export default function LandingView() {
   useMagneticButton(signInRef, { strength: 0.25, maxDistance: 10 });
   useDashboardParallax(containerRef);
   useDmitriParallax(containerRef, { scrub: 1.9 });
+
+  useEffect(() => {
+    if (autoAuth === 'login' || autoAuth === 'signup') {
+      openAuthModal(autoAuth);
+    }
+  }, [autoAuth, openAuthModal]);
 
   useEffect(() => {
     const cleanups = [];
@@ -60,19 +66,15 @@ export default function LandingView() {
   }, []);
 
   const handleStart = () => {
-    if (isAuthenticated) {
-      navigate('/room');
-    } else {
-      openAuthModal('signup');
-    }
+    navigate('/room');
   };
 
   const featurePills = [
-    { icon: Clock, label: 'Pomodoro Timer' },
-    { icon: CheckSquare, label: 'Personal To-Do' },
-    { icon: Users, label: 'Live Study Room' },
-    { icon: Trophy, label: 'XP Leaderboard' },
-    { icon: Bot, label: 'Gemini AI Tutor' },
+    { icon: Clock, label: 'Pomodoro Timer', path: '/pomodoro' },
+    { icon: CheckSquare, label: 'Personal To-Do', path: '/todo' },
+    { icon: Users, label: 'Live Study Room', path: '/study-room' },
+    { icon: Trophy, label: 'XP Leaderboard', path: '/leaderboard' },
+    { icon: Bot, label: 'Gemini AI Tutor', path: '/ai' },
   ];
 
   return (
@@ -92,7 +94,7 @@ export default function LandingView() {
         {/* Ambient floating speed badges (differential velocities) */}
         <div
           data-speed="-140"
-          className="hidden md:flex absolute top-10 right-8 items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold shadow-lg shadow-orange-500/5 preserve-3d"
+          className="hidden md:flex absolute top-10 right-8 items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold shadow-lg shadow-orange-500/5 preserve-3d pointer-events-none"
         >
           <Flame className="w-4 h-4 animate-bounce" />
           <span>7-Day Study Streak</span>
@@ -100,7 +102,7 @@ export default function LandingView() {
 
         <div
           data-speed="-220"
-          className="hidden md:flex absolute top-44 right-0 items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold shadow-lg shadow-amber-500/5 preserve-3d"
+          className="hidden md:flex absolute top-44 right-0 items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold shadow-lg shadow-amber-500/5 preserve-3d pointer-events-none"
         >
           <Zap className="w-4 h-4 text-amber-400" />
           <span>+25 XP per Session</span>
@@ -108,7 +110,7 @@ export default function LandingView() {
 
         <div
           data-speed="-90"
-          className="hidden md:flex absolute bottom-20 right-16 items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-zinc-300 text-xs font-semibold shadow-lg preserve-3d"
+          className="hidden md:flex absolute bottom-20 right-16 items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-zinc-300 text-xs font-semibold shadow-lg preserve-3d pointer-events-none"
         >
           <Bot className="w-4 h-4 text-orange-400" />
           <span>Gemini AI Study Tutor</span>
@@ -150,27 +152,31 @@ export default function LandingView() {
         </p>
 
         {/* Feature Pills */}
-        <div className="flex flex-wrap items-center gap-2 mb-10">
+        <div className="flex flex-wrap items-center gap-2 mb-10 relative z-20">
           {featurePills.map((pill, idx) => {
             const Icon = pill.icon;
             return (
-              <div
+              <button
                 key={idx}
-                className="landing-pill flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-medium text-zinc-300 shadow-sm hover:border-orange-500/40 hover:text-orange-300 transition-all hover:scale-105 active:scale-95 cursor-default"
+                type="button"
+                onClick={() => navigate(pill.path)}
+                className="landing-pill flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-medium text-zinc-300 shadow-sm hover:border-orange-500/50 hover:text-orange-300 hover:bg-zinc-900 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                title={`Open ${pill.label}`}
               >
                 <Icon className="w-3.5 h-3.5 text-orange-400" />
                 <span>{pill.label}</span>
-              </div>
+              </button>
             );
           })}
         </div>
 
         {/* Action Buttons */}
-        <div className="landing-cta flex items-center gap-3">
+        <div className="landing-cta flex items-center gap-3 relative z-20">
           <button
             ref={primaryCtaRef}
+            type="button"
             onClick={handleStart}
-            className="group flex items-center gap-2 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-95 transition-all"
+            className="group flex items-center gap-2 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-95 transition-all cursor-pointer"
           >
             <span>Start Your Journey</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -179,8 +185,9 @@ export default function LandingView() {
           {!isAuthenticated && (
             <button
               ref={signInRef}
+              type="button"
               onClick={() => openAuthModal('login')}
-              className="px-5 py-3.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 text-xs sm:text-sm font-semibold rounded-xl transition-all active:scale-95 hover:border-zinc-700"
+              className="px-5 py-3.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 text-xs sm:text-sm font-semibold rounded-xl transition-all active:scale-95 hover:border-zinc-700 cursor-pointer"
             >
               Sign In
             </button>
@@ -304,7 +311,11 @@ export default function LandingView() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Pillar /01 */}
-          <div className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/40 transition-all flex flex-col justify-between group preserve-3d">
+          <div
+            onClick={() => navigate('/room')}
+            className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/40 transition-all flex flex-col justify-between group preserve-3d cursor-pointer active:scale-[0.98]"
+            title="Open Study Room"
+          >
             <span
               className="text-5xl sm:text-6xl font-black stroke-text block will-change-transform mb-4 group-hover:text-orange-500/30 transition-colors"
               data-speed="-140"
@@ -323,7 +334,11 @@ export default function LandingView() {
           </div>
 
           {/* Pillar /02 */}
-          <div className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-amber-500/40 transition-all flex flex-col justify-between group preserve-3d">
+          <div
+            onClick={() => navigate('/leaderboard')}
+            className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-amber-500/40 transition-all flex flex-col justify-between group preserve-3d cursor-pointer active:scale-[0.98]"
+            title="Open Leaderboard"
+          >
             <span
               className="text-5xl sm:text-6xl font-black stroke-text block will-change-transform mb-4 group-hover:text-amber-500/30 transition-colors"
               data-speed="-220"
@@ -342,7 +357,11 @@ export default function LandingView() {
           </div>
 
           {/* Pillar /03 */}
-          <div className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/40 transition-all flex flex-col justify-between group preserve-3d">
+          <div
+            onClick={() => navigate('/ai')}
+            className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/40 transition-all flex flex-col justify-between group preserve-3d cursor-pointer active:scale-[0.98]"
+            title="Open Gemini AI Tutor"
+          >
             <span
               className="text-5xl sm:text-6xl font-black stroke-text block will-change-transform mb-4 group-hover:text-orange-500/30 transition-colors"
               data-speed="-160"
@@ -361,7 +380,11 @@ export default function LandingView() {
           </div>
 
           {/* Pillar /04 */}
-          <div className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-amber-500/40 transition-all flex flex-col justify-between group preserve-3d">
+          <div
+            onClick={() => navigate('/music')}
+            className="tilt-card p-5 rounded-2xl bg-[#0c0d11] border border-zinc-850 hover:border-amber-500/40 transition-all flex flex-col justify-between group preserve-3d cursor-pointer active:scale-[0.98]"
+            title="Open Music Room"
+          >
             <span
               className="text-5xl sm:text-6xl font-black stroke-text block will-change-transform mb-4 group-hover:text-amber-500/30 transition-colors"
               data-speed="-240"
@@ -388,7 +411,9 @@ export default function LandingView() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full perspective-1000">
           <div
             data-speed="-80"
-            className="landing-card preserve-3d will-change-transform p-4 rounded-xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/30 hover:shadow-md hover:shadow-orange-500/5 transition-all"
+            onClick={() => navigate('/room')}
+            className="landing-card preserve-3d will-change-transform p-4 rounded-xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/30 hover:shadow-md hover:shadow-orange-500/5 transition-all cursor-pointer active:scale-[0.98]"
+            title="View Calendar Streaks"
           >
             <div className="tilt-depth-lg flex items-center gap-2 text-orange-400 font-bold text-xs mb-1">
               <Flame className="w-3.5 h-3.5" />
@@ -401,7 +426,9 @@ export default function LandingView() {
 
           <div
             data-speed="-140"
-            className="landing-card preserve-3d will-change-transform p-4 rounded-xl bg-[#0c0d11] border border-zinc-850 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/5 transition-all"
+            onClick={() => navigate('/leaderboard')}
+            className="landing-card preserve-3d will-change-transform p-4 rounded-xl bg-[#0c0d11] border border-zinc-850 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/5 transition-all cursor-pointer active:scale-[0.98]"
+            title="View XP & Leaderboard"
           >
             <div className="tilt-depth-lg flex items-center gap-2 text-amber-400 font-bold text-xs mb-1">
               <Trophy className="w-3.5 h-3.5" />
@@ -414,7 +441,9 @@ export default function LandingView() {
 
           <div
             data-speed="-90"
-            className="landing-card preserve-3d will-change-transform p-4 rounded-xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/30 hover:shadow-md hover:shadow-orange-500/5 transition-all"
+            onClick={() => navigate('/ai')}
+            className="landing-card preserve-3d will-change-transform p-4 rounded-xl bg-[#0c0d11] border border-zinc-850 hover:border-orange-500/30 hover:shadow-md hover:shadow-orange-500/5 transition-all cursor-pointer active:scale-[0.98]"
+            title="Chat with Gemini AI Tutor"
           >
             <div className="tilt-depth-lg flex items-center gap-2 text-orange-400 font-bold text-xs mb-1">
               <Bot className="w-3.5 h-3.5" />
@@ -447,8 +476,9 @@ export default function LandingView() {
         </p>
 
         <button
+          type="button"
           onClick={handleStart}
-          className="group flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-orange-500/25 active:scale-95 transition-all"
+          className="group flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-orange-500/25 active:scale-95 transition-all cursor-pointer relative z-20"
         >
           <span>Enter Study Sanctuary</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

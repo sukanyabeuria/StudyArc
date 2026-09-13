@@ -26,7 +26,7 @@ export default function Navbar() {
       </NavLink>
 
       {/* Navigation Links using NavLink */}
-      <div className="hidden md:flex items-center gap-1 text-xs font-semibold">
+      <div className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold overflow-x-auto max-w-[45vw] sm:max-w-none py-1">
         {[
           { to: '/', label: 'Home' },
           { to: '/room', label: 'Study Room' },
@@ -38,7 +38,7 @@ export default function Navbar() {
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `relative px-3 py-1.5 rounded-lg transition-all ${
+              `relative px-2.5 sm:px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
                 isActive
                   ? 'text-orange-400 bg-orange-500/15 font-bold shadow-sm'
                   : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
@@ -58,7 +58,7 @@ export default function Navbar() {
       </div>
 
       {/* Right User Controls */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2.5 shrink-0">
         {isAuthenticated ? (
           <div className="flex items-center gap-2.5">
             {/* Streak Indicator with Warm Flame Flicker */}
@@ -70,7 +70,7 @@ export default function Navbar() {
             {/* User Profile Pill */}
             <NavLink
               to="/room"
-              className="group flex items-center gap-2 pl-1.5 pr-2.5 py-1 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-orange-500/50 rounded-full transition-all hover:shadow-sm hover:shadow-orange-500/20 active:scale-95"
+              className="group flex items-center gap-2 pl-1.5 pr-2.5 py-1 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-orange-500/50 rounded-full transition-all hover:shadow-sm hover:shadow-orange-500/20 active:scale-95 cursor-pointer"
             >
               <div className="w-5 h-5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold transition-transform group-hover:scale-110">
                 {user?.name?.[0]?.toUpperCase() || <User className="w-3 h-3" />}
@@ -83,9 +83,10 @@ export default function Navbar() {
 
             {/* Log Out */}
             <button
+              type="button"
               onClick={logout}
               title="Log out"
-              className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded-lg transition-all active:scale-90"
+              className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded-lg transition-all active:scale-90 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -93,15 +94,17 @@ export default function Navbar() {
         ) : (
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => openAuthModal('login')}
-              className="text-xs font-semibold text-zinc-400 hover:text-zinc-200 px-2.5 py-1.5 transition-all active:scale-95"
+              className="text-xs font-semibold text-zinc-400 hover:text-zinc-200 px-2.5 py-1.5 transition-all active:scale-95 cursor-pointer"
             >
               Log In
             </button>
             <button
               ref={getStartedRef}
+              type="button"
               onClick={() => openAuthModal('signup')}
-              className="px-3.5 py-1.5 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm shadow-orange-500/30 transition-all hover:scale-105 active:scale-95"
+              className="px-3.5 py-1.5 text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-sm shadow-orange-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               Get Started
             </button>

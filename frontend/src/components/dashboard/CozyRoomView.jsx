@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import gsap from 'gsap';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -14,7 +14,6 @@ import ThreeCozyOrb from '../three/ThreeCozyOrb';
 
 export default function CozyRoomView() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const containerRef = useRef(null);
 
   useDashboardParallax(containerRef);
@@ -63,7 +62,7 @@ export default function CozyRoomView() {
       icon: CheckSquare,
       color: 'text-orange-400',
       badge: 'Tasks',
-      path: '/todo'
+      path: '/workspace'
     },
     {
       id: 'pomodoro',
@@ -72,7 +71,7 @@ export default function CozyRoomView() {
       icon: Clock,
       color: 'text-amber-400',
       badge: 'Timer',
-      path: '/pomodoro'
+      path: '/workspace'
     },
     {
       id: 'music',
@@ -81,7 +80,7 @@ export default function CozyRoomView() {
       icon: Music,
       color: 'text-orange-500',
       badge: 'Audio',
-      path: '/music'
+      path: '/workspace'
     },
     {
       id: 'ai',
@@ -90,7 +89,7 @@ export default function CozyRoomView() {
       icon: Bot,
       color: 'text-amber-300',
       badge: 'AI Tutor',
-      path: '/ai'
+      path: '/workspace'
     },
   ];
 
@@ -153,10 +152,10 @@ export default function CozyRoomView() {
           {actionCards.map((card) => {
             const Icon = card.icon;
             return (
-              <button
+              <NavLink
                 key={card.id}
-                onClick={() => navigate(card.path || '/workspace')}
-                className="room-card preserve-3d will-change-transform group p-4 rounded-2xl bg-[#0c0d11] hover:bg-[#12141a] border border-zinc-850 hover:border-orange-500/40 text-left transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/15 active:scale-[0.98]"
+                to="/workspace"
+                className="room-card block preserve-3d will-change-transform group p-4 rounded-2xl bg-[#0c0d11] hover:bg-[#12141a] border border-zinc-850 hover:border-orange-500/40 text-left transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/15 active:scale-[0.98]"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="tilt-depth-lg w-9 h-9 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all text-orange-400">
@@ -177,7 +176,7 @@ export default function CozyRoomView() {
                     <ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
                   </div>
                 </div>
-              </button>
+              </NavLink>
             );
           })}
         </div>
